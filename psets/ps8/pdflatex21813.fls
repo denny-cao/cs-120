@@ -1,0 +1,4 @@
+PWD /Users/dennycao/Documents/harvard/freshman/fall/cs-120/psets/ps8
+INPUT /usr/local/texlive/2023/texmf.cnf
+INPUT /usr/local/texlive/2023/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt

@@ -1,0 +1,214 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+% Computational Problem Shortcuts
+\newcommand{\I}{\mathcal{I}}
+
+% Empty Set
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture 2: Measuring Efficiency Thursday, September 7, 2023
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: September 13, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Announcements}
+\begin{itemize}
+	\item SRE starts Tuesday
+	\item Participation surveys (see course website)
+\end{itemize}
+\section{Review}
+\subsection{Exhaustive Search Sort}
+Input: $B = ((k_0, v_0), ..., (k_{n-1}, v_{n-1}))$
+for each perm $\pi$ :
+
+
+if $k_{\pi(0)} \leq k_{\pi(1) \leq ... \leq k_{\pi{n-1}}}$:
+
+
+	return $((k_{\pi(0)}, v_{\pi(0)}), ...., (k_{\pi(n-1)},v_{\pi(n-1)})$
+\subsection{Insertion Sort}
+Input: $B = ((k_0, v_0), ..., (k_{n-1}, v_{n-1}))$
+
+for each $i=0,1,...,n-1$ :
+
+Insert $B(i)$ at correct place in $(B(0), ... , B(i-1))$
+
+return  $B$
+
+\subsection{Merge Sort}
+Input: $B = ((k_0, v_0), ..., (k_{n-1}, v_{n-1}))$
+
+if $n \leq 1$, return $B$ 
+
+else if $n=2$ and  $k_0 \leq k_1$, return $B$ 
+
+else if $n=2$ and $k_0 > k_1$, return $((k_1,v_1),(k_0,v_0))$
+
+else:
+$i = \ceil{n/2}$ 
+$B_i = \text{MergeSort}((k_0,v_0), ... , (k_{i-1},v_{i-1}))$
+$B_2 = ... ((k_i, v_i,... (k_{n-1},v_{n-1}))$ 
+return $\text{Merge}(B_1,B_2)$
+\subsection{Computational Problem}
+ \begin{definition}
+	 [Computational Problem]
+	 A \textit{computational problem} is a triple $\Pi = (\mathcal{I}, \mathcal{O}, f)$, where:
+	 \begin{itemize}
+		 \item $\mathcal{I}$ is the set of inputs/instances (typically infinity)
+		 \item $\mathcal{O}$ is the set of outputs
+		\item $f(x)$ is the set of solutions
+		\item $\forall x \in \mathcal{I}(f(x) \subseteq \mathcal{O})$
+			\begin{itemize}
+				\item Some inputs have multiple correct outputs, and thus $f(x) \subseteq \mathcal{O}$ rather than just being an element. Example: If same key, different values. Then there are multiple answers to sorting.
+			\end{itemize}
+	 \end{itemize}
+\end{definition}
+\begin{definition}
+	[Algorithm]
+	An \textit{algorithm} $A$ solves $\Pi$ if:
+	\begin{itemize}
+		\item $\forall x \in \I$ st $f(x) \neq \emptyset$ then $A(x) \in f(x)$ 
+		\item $\forall x \in \I$ if $f(x)= \emptyset$, $A(x) = \perp$
+	\end{itemize}
+\end{definition}
+\begin{remark}
+	The second part must be added because there is a possibility that there is no solution and the algorithm must return something.
+\end{remark}
+\section{Measuring Efficiency}
+\begin{definition}
+	[Run Time]
+	For an algorithm $A$, given a function $\text{size}(x)$ the runtime is:
+	\[
+		T(n) = \max(x : \text{size}(x) \leq n)
+	\]
+	where $T: \nats \to \reals^+$.
+\end{definition}
+\begin{itemize}
+	\item $n$ : Length of input, constraint. Consider all input, $x$, with size less than or equal to $n$.
+	\item $T(n)$: Maximize \# of basic operations performing $A$ on $x$
+	\item $\text{size}(x)$: \# of (key, value) pairs 
+	\item Basic Operations: Arithematic operations, manipulating pointers, executing lines of code, assigning variables
+	\item Non-basic Operations: Sorting
+	\item We take the $\max$ of $x$ because we are interested in the worst case scenario.
+	\item  $\text{size}(x) \leq n$ to make sure that $T(n)$ is increasing and valid on real inputs
+\end{itemize}
+\begin{notation}
+	[Big-Oh Notation]	
+	Let $f,g: \nats \to \reals^+$. We say:
+	\begin{itemize}
+		\item $f = O(g) :  \exists c > 0, \forall n \geq k \in \nats \mid f(n) \leq cg(n) $
+		\item  $f = \Omega(g) : \exists c > 0, \forall n \geq k \in \nats \mid f(n) \geq cg(n) \leftrightarrow g=O(f)$
+		\item $f = \Theta(g)$ :  $f=O(g) \land f=\Omega(g)$
+		\item $f = o(g) : \displaystyle\lim_{n \to \infty} \frac{f(n)}{g(n)} = 0$
+		\item $f = \omega(g) : \displaystyle\lim_{n \to \infty} \frac{f(n)}{g(n)} = \infty \leftrightarrow g = o(f)$
+	\end{itemize}
+\end{notation}
+\begin{example}
+	Find the running time of ESS.
+\end{example}
+\begin{soln}
+	There are $n!$ permutations of input of size $n$. For each permutation, execute $n-1$ steps. Therefore, $T_{ESS}(n) = \Theta(n!(n-1)) = O(n!(n-1)) = \Omega(n!(n-1)) = \Theta(n!n).$
+\end{soln}
+\begin{example}
+	Find the running time of Insertion Sort.
+\end{example}
+\begin{soln}
+	$T_{\text{ins sort}}(n) = \displaystyle O\paren*{\sum_{i=0}^n i} = O(n^2) = \Omega(n^2) = \Theta(n^2)$.
+\end{soln}
+\begin{example}
+	Find the running time of Merge Sort.
+\end{example}
+\begin{soln}
+	$T_{\text{merge sort}}(n) \displaystyle \leq T_{\text{merge sort}}\paren*{\ceil*{\frac{n}{2}}} + T_{\text{merge sort}}\paren*{\floor{\frac{n}{2}}} + \Theta(n) = O(n\log n)$
+\end{soln}
+\end{document}

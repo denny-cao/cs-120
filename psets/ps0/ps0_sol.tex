@@ -1,0 +1,261 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 0
+		\endgroup \vskip 0.3cm
+		Due: September 13, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section*{Collaborators}
+\begin{itemize}
+	\item Eric Huang: Helped understand 1c. I was initially confused by how the statement ``if we remove $\texttt{v}^*$ and not $\texttt{v}$, the subtree \textit{containing} \texttt{v} contains at most  $n/2$ vertices'' was true, as if that subtree had $n/2$ vertices, then it would imply that the maximum amount of vertices for another would be $n/2$ which is not greater than $n/2$. Eric told me to attempt to minimize $\phi(v)$, but still make it greater than $n/2$ which led me to my proof.
+	\item Ryan Jiang: Helped me get an idea for 2a. He told me to find a way where we could use the definition of $f(n-2)$, that there are $n-2$ donors and patients, where each donor is incompatible with unique patient. It led to me realize that, if two donors donated to each other's respective incompatible patient, it would produce a situation where $f(n-2)$ could be used and that there was the alternate case where they donate to different patients that are not incompatible with the other.
+\end{itemize}
+\section{Binary Trees}
+\begin{ans}
+	[Recursive Programming]
+	In \texttt{ps0.py}. The algorithm is $O(n)$.
+	\begin{proof}
+		In each recursive call, the algorithm visits one node in the tree and adds the left and right subtrees to the stack, performing basic operations for each node in the stack. For a tree with $n$ leaves, there will be $n$ basic operations, and therefore the algorithms is  $O(n)$.
+	\end{proof}
+\end{ans}
+\begin{ans}
+	[Proof Warmup] \
+	\begin{proof}
+		Let the subtree that is produced when $\texttt{v}$ is removed that contains \texttt{$\texttt{v}^*$.parent} be $P$, the subtree of \texttt{$\texttt{v}^*$.left} be $L$, the subtree of \texttt{$v^*$.right} be $R$. Let $|V(X)|$ denote the amount of vertices in a tree  $X$.
+		\\
+
+		$\texttt{v}^*$ has at most 3 possible edges: $(\texttt{v}^*.\texttt{parent}, \texttt{v}^*), (\texttt{v}^*.\texttt{left}, \texttt{v}^*), (\texttt{v}^*.\texttt{right},\texttt{v}^*)$. As $\texttt{v}^*$ is a neighbor of $\texttt{v}$, one of these edges connects $\texttt{v}$ and $\texttt{v}^*$. Thus, if $\texttt{v}$ is removed, then one of these edges is removed, thereby creating at most 3 subtrees---one will contain $\texttt{v}^*$ and will be the largest of the subtrees, and the others will be rooted at the neighbors of $\texttt{v}$ other than $\texttt{v}^*$. 
+\\
+
+Thus, the number of vertices in largest subtree created by removing $\texttt{v}$ will be the sum of subtrees that contain a neighbor of $\texttt{v}^*$ (an edge between $\texttt{v}^*$) when $\texttt{v}$ is removed:
+		\begin{itemize}
+			\item If \texttt{$v^*$.parent == v}, then $\phi(\texttt{v}) = |V(L)| + |V(R)| + 1$, as, if the subtree containing  $\texttt{v}^*$ is the largest subtree when $\texttt{v}$ is removed, then the subtree will contain the subtrees rooted at $\texttt{v}^*.\texttt{left}$ and $\texttt{v}^*.\texttt{right}$, as well as $\texttt{v}^*$ itself. 
+			\item Otherwise, if \texttt{$v$.parent == $\texttt{v}^*$}, then $\phi(\texttt{v}) = |V(P)| + |V(L)| + 1$ if \texttt{$v^*$.right ==  $\texttt{v}$} or $\phi = |V(P)| + |V(R)| + 1$ if \texttt{$v^*$.left == $\texttt{v}$}.
+		\end{itemize}
+%		If $v^*$ is removed instead of $v$, we will have at most 3 subtrees, as $v^*$'s edges will be removed, producing 3 subtrees contain $v^*$'s neighbors, $P$, $L$, and  $R$. One of these subtrees will contain $v$. We have 2 possibilities:
+
+		Thus, the subtree without $\texttt{v}$ when $\texttt{v}^*$ is removed that contains the most vertices ($P$, $L$, or $R$) is also included in the sum of $\phi(\texttt{v})$. As $\phi(\texttt{v})$ also counts $\texttt{v}^*$, $\phi(\texttt{v})$ will always be greater than the greatest number of vertices amongst subtrees without $\texttt{v}$ when $\texttt{v}^*$ is removed.
+%		\begin{itemize}
+%			\item $P$ contains $v$: The largest subtree without $v$ when $v^*$ is removed will thus be either $L$ or $R$. If $P$ contains $v$, $\phi(v) = |V(L)| + |V(R)| + 1$. As  $|V(L)| + |V(R)| + 1 > |V(L)| \land |V(L)| + |V(R)| + 1 > |V(R)|$,  $\phi(v)$ is greater than the amount of vertices in the largest subtree without $v$ when  $v^*$ is removed.
+%			\item $L \lor R$ contains $v$: The largest subtree without $v$ when $v*$ is removed will  
+%		\end{itemize}
+	\end{proof}
+% 	\begin{proof}
+% 		We consider the following cases:
+% 		\begin{enumerate}[i)]
+% 			\item $v^*$ is a child of $v$.
+% 
+% 			In this case, if $v^*$ is removed, the resulting subtrees without $v$ will be the rooted at the children of $v^*$, \texttt{$v^*$.left} and the other rooted at \texttt{$v^*$.right} (unless \texttt{$v^*$.left} or \texttt{$v^*$.right} is \texttt{None}). These subtrees are disjoint, as they have no common vertices.
+% 
+% 			Let $\phi(\texttt{$v^*$.left})$ denote the total vertices of the subtree rooted at \texttt{$v^*$.left} and $\phi(\texttt{$v^*$.right})$ denote the total vertices of the subtree rooted at \texttt{$v^*$.right}.
+% 			
+% 			$v^*$ is the root of the largest subtree created by removing $v$, as its parent, $v$, has been removed. Thus the total vertices of this subtree, $\phi(v) = \phi(v^*.\texttt{left}) + \phi(v^*.\texttt{right}) + 1$, as the total vertices is equal to the total vertices of the subtrees rooted at the children of the root and the root itself.
+% 
+% As $\phi(v)$ is the sum of both the total vertices of the potential subtrees and 1, the subtrees which do not contain $v$ after removing $v^*$ will be less than $\phi(v)$.
+% 			\item $v^*$ is a parent of $v$. 
+% 
+% 				In this case, the root of the largest subtree created by removing $v$ is the root of the tree. Let $\phi(\texttt{T.root})$ denote the total vertices of the tree. Let $\phi(\texttt{v.left})$ denote the total vertices of the subtree rooted at \texttt{v.left} and $\phi(\texttt{v.right})$ denote the total vertices of the subtree rooted at \texttt{v.right}. It follows that  $\phi(\texttt{T.root}) = \phi(v) + \phi(\texttt{v.left}) + \phi(\texttt{v.right}) + 1$, as the tree is composed of the subtrees created after removing  $v$, and $v$ itself.
+% 		\end{enumerate}
+% 	\end{proof}	
+\end{ans}
+\begin{ans}
+	[Proofs by Contradiction]
+	\
+	\begin{proof}
+		Assume for purposes of contradiction that, there exists a tree $T$ of size $n$ such that there exists a vertex $\texttt{v}$ such that removing $\texttt{v}$ from $T$ results in at least one disjoint tree with size greater than $n/2$.
+		\\
+
+		Let this subtree be denoted $T'$, with size $\phi(\texttt{v})$. Thus, $\phi(\texttt{v}) > n/2$. Let $T'$ be the smallest possible value such that this is true; that $\phi(\texttt{v}) = \floor{n/2 + 1}$. As $\floor{n/2 + 1} \leq n/2 + 1$, it follows that $\phi(\texttt{v}) \leq n/2 + 1$. 
+\\
+
+From Question 1.b, we know that, if the neighbor of $\texttt{v}$ in $T'$---$\texttt{v}^*$---is removed instead, then the largest subtree that does not include $\texttt{v}$ will be less than  $\phi(\texttt{v})$. Let the size of this subtree be denoted $\phi(\texttt{v}^*)$. As  $\phi(\texttt{v}^*) < \phi(\texttt{v})$, it follows that $\phi(\texttt{v}^*) < n/2 + 1$, which means $\phi(\texttt{v}^*) \leq n/2$. As $\phi(\texttt{v}^*)$ is defined as the size of the largest subtree that does not include $\texttt{v}$ when $\texttt{v}^*$ is removed, it means that all other subtrees that do not include $\texttt{v}$ when $\texttt{v}^*$ is removed will also be at most $n/2$. 
+		\\
+
+		Let the subtree that includes $\texttt{v}$ when $\texttt{v}^*$ is removed be $S$. The total amount of vertices for $T$, $|V(T)|$, is the sum of $|V(T')| + |V(S)|$ as when $\texttt{v}^*$ and $\texttt{v}$ are reconnected, the tree $T$ is produced. As $|V(T)| = n$ and $|V(T')| = \phi(\texttt{v}) = \floor{n/2 + 1}$, $n - \floor{n/2 + 1} = |V(S)|$:
+		\begin{align*}
+			n - \floor{n/2 + 1} &= |V(S)| \\
+			n - 1 - \floor{n/2} &= |V(S)|
+		\end{align*}
+		Let $\floor{n/2} = c, c \in \ints$. Then, $n/2 = c \lor n/2 = c - 1/2$. If $n/2 = c$, then $|V(S)| = n - 1 - c = n/2 - 1$. If $n/2 = c - 1/2$, then $|V(S)| = n - 1 - c + 1/2 = n/2 - 1/2$. In both cases, $|V(S)|$ is less than $n/2$. $\contradiction$
+		\\
+
+		We reach a contradiction, as, from our assumption, if all subtrees not including $\texttt{v}$ when $\texttt{v}^*$ is removed have at most $n/2$ vertices, then the subtree with $\texttt{v}$ has to have more than $n/2$ vertices. Thus, we have shown that for every tree $T$ of size $n$, there exists a vertex $\texttt{v}$ such that removing $\texttt{v}$ from $T$ results in disjoint trees that all have size at most $n/2$.
+%		Assume for purposes of contradiction that, for every tree $T$ of size $n$, there exists a vertex $v$ such that removing $v$ from $T$ results in at least one disjoint tree with size greater than $n/2$.
+%		\\
+%
+%		Let $v$ be the vertex that when removed, will result in the smallest amount of vertices for a component $T'$ that contains $v^*$ that is the largest subtree with size greater than $n/2$. 
+%		\\
+%
+%		Since $|V(T')| > n/2$, it follows that the component rooted at $v$ when $v^*$ is removed, $T - T'$, will contain at most $n/2$ vertices.
+%		\\
+%
+%		When $v^*$ is removed, it will result in  the subtree rooted at $v$, $T - T'$, as well as $T' - \{v^*\}$. $\contradiction$
+%		\\
+%
+%		We reach a contradiction, as  we picked $v$ to result in the smallest amount for $|V(T')|$ that will still satisfy $|V(T')| > n/2$. However, as $|V(T)-V(T')| \leq n/2$ and $|V(T' - \{y\})| < |V(T')|$, it follows that picking to remove $v^*$ instead of $v$ will result in a smaller amount of vertices in the largest subtree with size greater than $n/2$.
+%	\\
+%
+%	Let the subtree with size greater than $n/2$ when $v$ is removed be denoted by $T'$. Since $|V(T')| > n/2$, $|V(T) - V(T')| < n/2$. However, we have shown that, by removing mk
+	\end{proof}
+\end{ans}
+\begin{ans}
+	[From Proofs to Algorithms]
+	\texttt{find\_vertex} runs at $O(h)$ time complexity as it traverses level by level in the binary tree to the vertex with the greatest \texttt{v.size} amongst children for the current vertex and then computes basic operations on that vertex to determine whether $\phi(\texttt{v}) \leq n/2$ and then returns when it is.
+\end{ans}
+\section{Matchings and Induction}
+\begin{ans}
+\
+	\begin{proof}
+		Let the donors be $d_1, \dots, d_n$ and the patients be $p_1, \dots, p_n$, where $p_x = \text{incomp}(d_x)$ and $d_x = \text{incomp}(p_x)$. Without loss of generality, let $d_i$ be paired with a patient it is compatible with, $p_j$, $j \neq i$. There are $n-1$ possibilities for $p_j$ as there are $n$ patients and $d_i$ is incompatible with $p_i$. There are now two cases for what $d_j$ is matched to: 
+\begin{enumerate}[i)]
+	\item $(d_j, p_t), t \neq i$; $d_j$ is matched with a patient that $d_i$ is compatible with.
+	\item $(d_j, p_i)$; $d_j$ is matched with the patient that  $d_i$ is incompatible with.
+\end{enumerate}
+In the second case, there will be $f(n-2)$ ways to match the remaining $n-2$ donors with patients, as each donor will have a patient they are incompatible with. Thus, in the second case,  $f(n) = (n-1)(1)(f(n-2)) = (n-1)f(n-2)$.
+\\
+
+As  $(n-1)f(n-2)$ only accounts for the second case and $f(n)$ will be the sum of the number of possibilities in the first case as well as the second case,  $f(n) > (n-1)f(n-2)$.
+	\end{proof}
+\end{ans}
+\begin{ans}
+\
+	\begin{proof}
+		We consider the first case from the proof in Answer 2.a. There are $n-1$ matchings for $d_i$ to a patient other than $p_i$, $p_j$. As case 1 considers when  $d_j$ is matched to a patient other than $p_i$ and  $d_j$ is compatible with all remaining $n-2$ patients ($p_j$ is already matched), every remaining donor has one patient they are incompatible with. Thus there are $f(n-1)$ ways to match the remaining donors to patients. Thus, the total ways to match donors to patients in case 1 is $(n-1)f(n-1)$. The total ways to match patients to donors is the sum of possibilities in case 1 and case 2:
+		\begin{align*}
+			f(n) &= (n-1)f(n-1) + (n-1)f(n-2) \\
+			f(n) &= (n-1)(f(n-1) + f(n-2))
+		\end{align*}
+Thus, we have shown that for all $n \geq 3$, $f(n) = (n-1) \cdot (f(n-1) + f(n-2))$.
+	\end{proof}
+\end{ans}
+\begin{ans}
+\
+\begin{proof}
+	
+	By strong induction. Let $P(n)$ be the statement that $\displaystyle \frac{n!}{3} \leq f(n) \leq \frac{n!}{2}$,  $n \geq 2$.
+	\\
+	
+	\textit{Base Case:} $n = 2$. Since $\displaystyle \frac{2!}{3} = \frac{2}{3}$ and $\displaystyle \frac{2!}{2} = 1$,  $P(2)$, or  $\displaystyle \frac{2}{3} \leq f(2) \leq 1$, is true as $f(2) = 1$.
+\\
+
+\textit{Inductive Step}: Assume $P(k)$ for $2 \leq k < n$, $k,n \in \nats$. 
+\\
+
+Then, by the inductive hypothesis:
+\begin{align*}
+	\frac{(n-1)!}{3} \leq f(n-1) \leq \frac{(n-1)!}{2} \\
+	\frac{(n-2)!}{3} \leq f(n-2) \leq \frac{(n-2)!}{2}
+\end{align*}
+Thus:
+\[
+\frac{(n-1)!}{3} + \frac{(n-2)!}{3} \leq f(n-1) + f(n-2) \leq \frac{(n-1)!}{2} + \frac{(n-2)!}{2} \\
+\] 
+Multiplying by $(n-1)$, we obtain: 
+ \[
+(n-1) \paren*{\frac{(n-1)!}{3} + \frac{(n-2)!}{3}} \leq (n-1)(f(n-1) + f(n-2)) \leq (n-1) \paren*{\frac{(n-1)!}{2} + \frac{(n-2)!}{2}}
+\] 
+From Answer 2.b:
+\begin{align*}	
+	(n-1) \paren*{\frac{(n-1)!}{3} + \frac{(n-2)!}{3}} \leq &f(n) \leq (n-1) \paren*{\frac{(n-1)!}{2} + \frac{(n-2)!}{2}} \\
+	\frac{(n-1)(n-1)! + (n-1)(n-2)!}{3} \leq &f(n) \leq \frac{(n-1)(n-1)! + (n-1)(n-2)!}{2} \\
+	\frac{(n-1)(n-1)! + (n-1)!}{3} \leq &f(n) \leq \frac{(n-1)(n-1)! + (n-1)!}{2} \\
+	\frac{(n-1)!(n-1 + 1)}{3} \leq &f(n) \leq \frac{(n-1)!(n-1 + 1)}{2} \\
+	\frac{(n-1)!(n)}{3} \leq &f(n) \leq \frac{(n-1)!(n)}{2} \\
+	\frac{n!}{3} \leq &f(n) \leq \frac{n!}{2} \\
+\end{align*}
+Thus, we have proved for $n$. Therefore, by strong induction, we have shown that  $P(n)$ is true, $n \geq 2$.
+\end{proof}
+\end{ans}
+\end{document}

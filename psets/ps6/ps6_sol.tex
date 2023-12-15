@@ -1,0 +1,668 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+\usepackage{float}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning,chains,fit,shapes,calc}
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 6}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 6
+		\endgroup \vskip 0.3cm
+		Due: November 1, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\textbf{Collaborators:}
+
+\textbf{No. of late days used on previous psets:} 2
+
+\textbf{No. of late days used after including this pset:} 2
+\section{Matching Algorithms}
+\newcommand*\makeAlph[1]{\symbol{\numexpr64+#1}}
+\begin{enumerate}[(a)]
+	\item \
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw (d_3) -- (r_3);
+\draw (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw (d_5) -- (r_5);
+\draw (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw (d_2) -- (r_1);
+\draw (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+\end{tikzpicture}
+\caption{Bipartite graph of riders and drivers.}
+\end{figure}
+	\item Let purple edges denote the current matching, green denote the augmented path, and orange denote an edge that is in both the current matching and the augmented path. Let the image on the left depict the current matching and the image on the right depict the augmented path.
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw (d_3) -- (r_3);
+\draw[very thick, purple] (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw (d_5) -- (r_5);
+\draw (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw (d_2) -- (r_1);
+\draw[very thick, purple] (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+\end{tikzpicture}
+\quad
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw[very thick,green] (d_3) -- (r_3);
+\draw[very thick,orange] (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw[very thick, green] (d_5) -- (r_5);
+\draw (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw[very thick, green] (d_2) -- (r_1);
+\draw[very thick, orange] (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+
+\end{tikzpicture}
+\caption{Step 1.}
+\end{figure}
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw[very thick, purple] (d_3) -- (r_3);
+\draw (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw[very thick, purple] (d_5) -- (r_5);
+\draw (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw[very thick, purple] (d_2) -- (r_1);
+\draw (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+
+\end{tikzpicture}
+\quad
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw[very thick, green] (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw[very thick, orange] (d_3) -- (r_3);
+\draw (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw[very thick, green] (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw[very thick, orange] (d_5) -- (r_5);
+\draw[very thick, green] (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw[very thick, purple] (d_2) -- (r_1);
+\draw (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+
+\end{tikzpicture}
+\caption{Step 2.}
+\end{figure}
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw[very thick, purple] (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw (d_3) -- (r_3);
+\draw (d_5) -- (r_3);
+
+\draw (d_4) -- (r_4);
+\draw[very thick, purple] (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw (d_5) -- (r_5);
+\draw[very thick, purple] (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw[very thick, purple] (d_2) -- (r_1);
+\draw (d_3) -- (r_1);
+
+\draw (d_3) -- (r_2);
+
+\end{tikzpicture}
+\quad
+\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw[very thick, purple] (d_1) -- (r_3);
+\draw (d_6) -- (r_3);
+\draw (d_3) -- (r_3);
+\draw (d_5) -- (r_3);
+
+\draw[very thick, green] (d_4) -- (r_4);
+\draw[very thick, orange] (d_5) -- (r_4);
+\draw (d_3) -- (r_4);
+
+\draw[very thick, green] (d_5) -- (r_5);
+\draw[very thick, orange] (d_3) -- (r_5);
+
+\draw (d_4) -- (r_1);
+\draw[very thick, purple] (d_2) -- (r_1);
+\draw (d_3) -- (r_1);
+
+\draw[very thick,green] (d_3) -- (r_2);
+\end{tikzpicture}
+\caption{Step 3.}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[thick,
+  every node/.style={draw,circle},
+  fsnode/.style={fill=red},
+  ssnode/.style={fill=blue},
+  every fit/.style={ellipse,draw,inner sep=-2pt,text width=2cm},
+  -,shorten >= 3pt,shorten <= 3pt
+]]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm, yshift=-.5cm]
+\foreach \i in {1,2,...,5}
+\node[fsnode,on chain] (r_\i) [label=left: \makeAlph{\i}] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm, start chain=going below,node distance=7mm]
+\foreach \i in {1,2,...,6}
+  \node[ssnode,on chain] (d_\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [red,fit=(r_1) (r_5),label=above:$\text{Riders}$] {};
+% the set V
+\node [blue,fit=(d_1) (d_6),label=above:$\text{Drivers}$] {};
+
+% the edges
+\draw[very thick, purple] (d_1) -- (r_3);
+\draw[dotted, semithick] (d_6) -- (r_3);
+\draw[dotted, semithick] (d_3) -- (r_3);
+\draw[dotted, semithick] (d_5) -- (r_3);
+
+\draw[very thick, purple] (d_4) -- (r_4);
+\draw[dotted, semithick] (d_5) -- (r_4);
+\draw[dotted, semithick] (d_3) -- (r_4);
+
+\draw[very thick, purple] (d_5) -- (r_5);
+\draw[dotted, semithick] (d_3) -- (r_5);
+
+\draw[dotted, semithick] (d_4) -- (r_1);
+\draw[very thick, purple] (d_2) -- (r_1);
+\draw[dotted, semithick] (d_3) -- (r_1);
+
+\draw[very thick,purple] (d_3) -- (r_2);
+\end{tikzpicture}
+\caption{Maximal Matching of $G$.}
+\end{figure}
+	\item We use \texttt{GreedyIntervalScheduling} to solve this problem by converting each trip as an interval $[a,b]$, where $a$ is the pick up time and $b$ is the arrival time and converting the time to the sum of the hour and the minutes divided by 60 in order for $a,b \in \mathbb{Q}$. We then sort the trips in order of increasing order of end time $b$. We now run the loop:
+		\begin{figure}[H]
+			\centering
+			\resizebox{\textwidth}{!}{\begin{tabular}{c|l}
+				$i$ & $S$ \\
+				\hline 
+				0 & $\emptyset$ \\
+				1 & $\set*{[10, 10:29]}$ \\
+				2 & $\set*{[10, 10:29]}$ \\
+				3 & $\set*{[10, 10:29], [11:15, 11:29]}$ \\
+				4 & $\set*{[10, 10:29], [11:15, 11:29]}$ \\
+				5 & $\set*{[10, 10:29], [11:15, 11:29]}$ \\
+				6 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14]}$ \\
+				7 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29]}$ \\
+				8 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29]}$ \\
+				9 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29], [12:30, 12:59]}$ \\
+				10 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29], [12:30, 12:59]}$ \\
+				11 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29], [12:30, 12:59], [13:00, 13:29]}$ \\
+				12 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29], [12:30, 12:59], [13:00, 13:29]}$ \\
+				13 & $\set*{[10, 10:29], [11:15, 11:29], [11:30, 12:14], [12:15, 12:29], [12:30, 12:59], [13:00, 13:29], [13:30, 13:59]}$ \\
+		\end{tabular}}
+		\end{figure}
+\end{enumerate}
+\section{EthiCS Reflection}
+The kidney should go to Patient B in a Utilitarian approach in order to maximize total welfare in society---we must make the most of the scarce resources we are provided with. The overall utility gained from giving the kidney to Patient B will 4 QALYs more than if the kidney was given to Patient A. In doing so, we maximize the benefit to society as a whole by achieving the greatest amount of welfare. However, we must recognize that this situation could further perpetuate inequalities, as if all decisions were made in this way, we forgo the possibility that Patient B will gain more utility due to socioeconomic reasons affecting healthcare, as well as the fact that, potentially, Patient A was waiting substantially longer than Patient B. With the given information though, we hold all else the same for Patient A and Patient B, and thus giving the kidney to Patient B would be my decision.
+\section{Vertex-Weighted Matching}
+\begin{enumerate}[(a)]
+\item		\begin{proof}
+			If $M$ is the maximum-size matching, then $V(M) = V(M')$, and thus  $V(M) \subseteq V(M')$. If $M$ is not the maximum-size matching, then by Berge's Theorem, there exists an augmenting path in $G$ with respect to $M$. We can thus run \texttt{MaxMatchingAugPaths($G$)} starting with $M_0 = M$ rather than $\emptyset$. In every loop until we reach $M'$, we augment $M$ using $P$. Let this matching be $M_{i+1}$ which represents the matching produced after the $i$'th loop. Let $P = (v_0, \dots, v_l)$, and $\set*{v_0, v_1} \in E \setminus M$ and $\set*{v_{l-1}, v_l} \in E \setminus M$ since both  $v_0$ and $v_l$ are unmatched. By the proof of Lemma 5.2:
+			\[
+				M_{i+1} = (M_i - \set*{\set*{v_1, v_2}, \set*{v_3,v_4}, \dots, \set*{v_{l-2}, v_{l-1}}}) \unite \set*{\set*{v_0, v_1}, \set*{v_2, v_3}, \dots, \set*{v_{l-1}, v_{l}}}
+			\]
+			We see that, although we remove the edges that connect $v_{j}$ and $v_{j+1}$, $j \in \set*{1, \dots, l-2}$ and thus remove all $v_j$ and $v_{j+1}$ from the matching, we ``add back'' both, as we include edges that connect $v_{k}$ and $v_{k}$, $k \in \set*{0, l-1}$ to the matching, and thus the vertices $v_j, v_{j+1}, j \in \set*{1, \dots, l-2}$ remain in the matching, and we add an additional vertex to the matching, $v_l$. All other edges in the matching remain unchanged, and thus the vertices that are not in $P$ are unchanged and remain in the matching. Thus, we have a loop invariant that that all vertices of $V(M_i)$ remain in $V(M_{i+1})$ and there is an additional vertex in $V(M_{i+1})$. It follows that, at the end of the loop, we will reach $M'$ where all elements of $V(M)$ are in $V(M')$. Thus, $V(M) \subseteq V(M')$ and the proof is complete.
+		\end{proof}
+	\item 
+		\begin{proof}
+			If $M$ is the vertex-weighted maximum matching, then $M = M^*$, and thus $w(M) \leq w(M^*)$ and $|M| \leq |M^*|$. If $M$ is not the vertex-weighted maximum matching, then by Berge's Theorem, there exists an augmenting path in $G$ with respect to $M$. We can thus run $\texttt{MaxMatchingAugPaths($G$)}$ starting with $M_0 = M$ rather than $\emptyset$. In every loop until we reach $M'$, we augment $M$ using $P$. Let this matching be $M_{i+1}$ which represents the matching produced after the $i$'th loop. Let $P = (v_0, \dots, v_l)$, and $\set*{v_0, v_1} \in E \setminus M$ and $\set*{v_{l-1}, v_l} \in E \setminus M$ since both  $v_0$ and $v_l$ are unmatched. By the proof of Lemma 5.2:
+			\[
+				M_{i+1} = (M_i - \set*{\set*{v_1, v_2}, \set*{v_3,v_4}, \dots, \set*{v_{l-2}, v_{l-1}}}) \unite \set*{\set*{v_0, v_1}, \set*{v_2, v_3}, \dots, \set*{v_{l-1}, v_{l}}}
+			\]
+By definition of total weight:
+\begin{align*}
+	w(M_{i+1}) &&= w(M_i) &-(w(v_1) + w(v_2) + w(v_3) + w(v_4) + \dots + w(v_{l-2}) + w(v_{l-1})) \\
+			   && &+(w(v_0) + w(v_1) + w(v_2) + w(v_3) + \dots + w(v_{l-1}) + w(v_l)) \\
+\end{align*}
+This simplifies to:
+\[
+	w(M_{i+1}) = w(M_i) + w(v_0) + w(v_l)
+\] 
+Thus, $w(M_i) \leq w(M_{i+1}) \leq \dots \leq w(M^*)$, where $M^*$ is the matching produced when the loop terminates. It follows that, for all $M$, $w(M) \leq w(M^*)$. From Part 3a, we also know that $V(M) \leq V(M^*)$, and thus $|M| \leq |M^*|$, and the proof is complete.
+		\end{proof}
+	\item The same is true for the maximin objective as we can, instead of choosing an arbitrary augmented path $P$, we can instead choose the path $P$ that preserves the edges that have the least weight; we choose a $P = (v_0, \dots, v_l)$ such that the edges added to $M_i$ are of least weight and the edges removed are the greatest possible weight. This will still maximize the size, as we continuously add the minimum edge that will lead to a larger matching.
+\end{enumerate}
+\section{Edge-Weighted Bipartite Matching}
+\begin{enumerate}[(a)]
+	\item \
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+
+\begin{tikzpicture}[thick,
+  fsnode/.style={fill=myblue,draw,circle},
+  ssnode/.style={fill=mygreen,draw,circle},
+  -,shorten >= 3pt,shorten <= 3pt,
+  every edge quotes/.style = {font=\footnotesize, sloped}
+]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm]
+\foreach \i in {1,2,3}
+\node[fsnode,on chain] (f\i) [label=left: \i] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm,start chain=going below,node distance=7mm]
+\foreach \i in {4,5,6}
+  \node[ssnode,on chain] (s\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [myblue,fit=(f1) (f3),label=above:$U$, style={draw, circle}] {};
+% the set V
+\node [mygreen,fit=(s4) (s6),label=above:$V$, style={draw, circle}] {};
+
+\draw (f1) edge["100", above] (s4);
+\draw (f1) edge["1", above left] (s5);
+\draw (f2) edge["1", above right] (s4);
+\draw (f3) edge["1", above] (s6);
+% the edges
+\end{tikzpicture}
+\caption{Edge-weighted bipartite graph where there is no matching in $G$ that maximizes weight $w(M)$ and size $|M|$.
+}
+	\end{figure}
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+
+\begin{tikzpicture}[thick,
+  fsnode/.style={fill=myblue,draw,circle},
+  ssnode/.style={fill=mygreen,draw,circle},
+  -,shorten >= 3pt,shorten <= 3pt,
+  every edge quotes/.style = {font=\footnotesize, sloped}
+]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm]
+\foreach \i in {1,2,3}
+\node[fsnode,on chain] (f\i) [label=left: \i] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm,start chain=going below,node distance=7mm]
+\foreach \i in {4,5,6}
+  \node[ssnode,on chain] (s\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [myblue,fit=(f1) (f3),label=above:$U$, style={draw, circle}] {};
+% the set V
+\node [mygreen,fit=(s4) (s6),label=above:$V$, style={draw, circle}] {};
+
+\draw (f1) edge["100", above, red] (s4);
+\draw (f1) edge["1", above left, dotted] (s5);
+\draw (f2) edge["1", above right, dotted] (s4);
+\draw (f3) edge["1", above, red] (s6);
+% the edges
+\end{tikzpicture}
+\caption{Matching that maximizes $w(M) = 101$, but $|M| = 2$.}
+\end{figure}
+		\begin{figure}[H]
+		\centering
+\definecolor{myblue}{RGB}{80,80,160}
+\definecolor{mygreen}{RGB}{80,160,80}
+
+\begin{tikzpicture}[thick,
+  fsnode/.style={fill=myblue,draw,circle},
+  ssnode/.style={fill=mygreen,draw,circle},
+  -,shorten >= 3pt,shorten <= 3pt,
+  every edge quotes/.style = {font=\footnotesize, sloped}
+]
+
+% the vertices of U
+\begin{scope}[start chain=going below,node distance=7mm]
+\foreach \i in {1,2,3}
+\node[fsnode,on chain] (f\i) [label=left: \i] {};
+\end{scope}
+
+% the vertices of V
+\begin{scope}[xshift=4cm,start chain=going below,node distance=7mm]
+\foreach \i in {4,5,6}
+  \node[ssnode,on chain] (s\i) [label=right: \i] {};
+\end{scope}
+
+% the set U
+\node [myblue,fit=(f1) (f3),label=above:$U$, style={draw, circle}] {};
+% the set V
+\node [mygreen,fit=(s4) (s6),label=above:$V$, style={draw, circle}] {};
+
+\draw (f1) edge["100", above, dotted] (s4);
+\draw (f1) edge["1", above left, red] (s5);
+\draw (f2) edge["1", above right, red] (s4);
+\draw (f3) edge["1", above, red] (s6);
+% the edges
+\end{tikzpicture}
+\caption{Matching that maximizes $|M| = 3$, but $w(M) = 3$.}
+\end{figure}
+There is an inherent tension between these two objectives, as in order to maximize size $|M|$, we may have to choose an edge that does not maximize the weight $w(M)$, and when maximizing $w(M)$, we may have to choose an edge that will lead to a decrease in total matchings, but increase $w(M)$.
+\item 
+	\begin{proof}
+		We can construct a weighed graph $G' = (V_0' \unite V_1', E', w)$, where $V_0' = V_0, V_1' = V_1$, and $E' = E \unite \set*{\set*{d_i, p_i} \mid 0 \leq i \leq n-1, i \in \ints}$ and $w$ is an array specifying a nonnegative edge weight $w(e), \forall e \in E$. Let $w(\set*{d_i, p_i}) = 0, \forall 0 \leq i \leq n-1, i \in \ints$, and for all other edges $e$, let $w(e) = 1$. We can then reduce to a maximum-weight perfect matching, which will prefer to pick an edge that is not in the form $\set*{d_i, p_i}$, as the weight of all other edges are $1 > 0$. From the result, we can then count the amount of matchings there are and subtract by the amount of matchings from $d_i$ to $p_i$.
+	\end{proof}
+\end{enumerate}
+\end{document}

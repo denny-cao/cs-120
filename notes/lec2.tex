@@ -1,0 +1,172 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+% Computational Problem Shortcuts
+\newcommand{\I}{\mathcal{I}}
+
+% Empty Set
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture 3: Reduction --- Thursday, September 7, 2023
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: September 13, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Comparison-Based Sorting}
+\begin{itemize}
+	\item Exhaustive Search
+	\item Insertion Sort 
+	\item Merge Sort
+\end{itemize}
+\begin{proof}
+	[Proof of Lower Bound]
+	The input is: $((\sigma(0), \emptyset), \dots, (\sigma(n), \emptyset)$. 
+
+The output is  $((0, \emptyset), \dots, (n, \emptyset))$.
+	\\
+	$2^T > n!$. Represents number of possible outcomes (permutations) will be at least $n!$. We take the log of both sides = $\Omega \paren*{\displaystyle \frac{n}{e}^n}$
+\end{proof}
+\begin{remark}
+	Look over lecture notes... Don't understand
+\end{remark}
+\section{Reductions}
+\subsection{Duplicate Search}
+\begin{problem}
+	[Duplicate Search Problem]	
+	\
+	Input: $a_0, \dots, a_{n-1}$ 
+
+	Output: A duplicate number; such that $\exists i \neq j \mid a_i = a_j = a$
+\end{problem}
+\begin{algorithm}
+	[$O(n^2)$: Naive Approach]
+	For each $a_i$, loop through all  $a_j$, $i<j\leq n-1$. Return  $a_i$ if duplicate found else  $\perp$.
+\end{algorithm}
+\begin{algorithm}
+	[$O(n\log n)$: Sorted Array Approach]	
+	\
+	\begin{enumerate}
+	\item Form an array $(k_0, v_0), \dots, (k_{n-1}, v_{n-1})$ with $k_i = a_i, v_i = \emptyset$: Output  $S$
+	\item Sort
+	\item For $0 \leq i < n - 1$, check if  $S[i] = S[i+1]$
+	\end{enumerate}
+\end{algorithm}
+\begin{proof}
+	[Proof of Correctness]
+	Check lecture notes.
+\end{proof}
+\begin{remark}
+	By convention, sorting problems are for key-value pairs. $v_i = \emptyset$ because we are ignoring the value and just sorting keys.
+\end{remark}
+We will formalize reduction:
+\begin{definition}
+	[Formalism of Reduction]
+	\
+	Input $\Pi = (\mathcal{I}, \mathcal{O}, f)$ 
+
+	\textit{Oracle}  $\Gamma = (J, \varphi, g)$. 
+\end{definition}
+\begin{definition}
+	[Oracle]
+	An \textit{oracle} is a function which given $x \in \mathcal{J}$, outputs on element of $g(x)$.
+\end{definition}
+\begin{definition}
+	[Reduction]
+A \textit{reduction} is an algorithm that solves $\Pi$ using an oracle or $\Gamma$ as a subroutine.
+\end{definition}
+\begin{remark}
+	$\Pi \leq \Gamma$	
+\end{remark}
+\begin{remark}
+	For duplication search algorithm 2.3, oracle is the sorting algorithm. We don't have to prove the oracle again. Do not need to be specific about oracle; can just say ``sort''.
+\end{remark}
+\end{document}

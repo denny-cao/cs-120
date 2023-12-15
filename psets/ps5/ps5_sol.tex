@@ -1,0 +1,209 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+\usepackage{float}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 4}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 5
+		\endgroup \vskip 0.3cm
+		Due: October 25, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\textbf{Collaborators:}
+
+\textbf{No. of late days used on previous psets:} 2
+
+\textbf{No. of late days used after including this pset:} 2
+\section{Exponential-Time Coloring}	
+\begin{enumerate}[(a)]
+	\addtocounter{enumi}{3}
+	\item Within the time limit of 10 seconds:
+		\begin{itemize}
+			\item \texttt{Exhaustive-Search 3-Coloring}: For Line of Rings, no combination of parameters resulted in the algorithm completing within the time limit. For Randomized Cluster Connections, the largest instance it can solve is when there is a probability of keeping an edge of 0.8 with 2 clusters of size 10 (n = 20, m = 83). The smallest instance it cannot solve within a reasonable time is when there is a probability of keeping an edge of 0.2 with 3 clusters with a size of 10 (n = 30, m = 55).
+			\item \texttt{ISET-BFS Coloring}: The largest instance it can solve is when there are 200 rings with a size of 4. (n = 800, m = 999). The smallest instance it cannot solve within a reasonable time limit is when there are 100 rings with a size of 3. (n = 300, m = 399). The largest instance it can solve is when there is a probability of keeping an edge of 0.8 with 2 clusters of size 18 (n = 36, m=248). The smallest instance it cannot solve within a reasonable time is when there is a probability of keeping an edge of 0.2 with 4 clusters with size 10 (n =- 40, m =123).
+		\end{itemize}
+		There is no instance where \texttt{Exhaustive-Search 3-Coloring} finishes but \texttt{ISEF-BFS Coloring} does not; either  \texttt{ISEF-BFS Coloring} is the only of the two that finishes within the time limit, or both do. Thus, relatively, \texttt{ISEF-BFS Coloring} is faster than \texttt{Exhaustive-Search 3-Coloring}. This is makes sense, as \texttt{Exhaustive-Search 3-Coloring} takes time $O(m 3^n)$, as there are $3^n$ ways to pick a color for each of the $n$ vertices with $m$ edges which must be checked to see if there are conflicting colors, whereas \texttt{ISEF-BFS Coloring} takes time $O(1.89^n)$ as shown from the SRE.
+\end{enumerate}
+\section{Reductions Between Variants of IndependentSet}
+\begin{enumerate}[(a)]
+	\item 
+		\begin{proof}
+			We first describe the algorithm:
+			\begin{itemize}
+				\item Make an oracle call \texttt{IndependentSet-OptimizationSearch} on the input graph $G$. Let the independent set returned be $S$.
+				\item Postprocess: Find size of $S$. Let this be $n$.
+				\item If $n \geq k$, return \texttt{YES}. Otherwise, return \texttt{NO}.
+			\end{itemize}
+			We now want to prove our reduction algorithm:
+			\begin{enumerate}[1.]
+				\item has the desired runtime and
+				\item is correct.
+			\end{enumerate}
+			\begin{itemize}
+				\item There is a single oracle call to \texttt{IndependentSet-OptimizationSearch} that runs at most $T(n,m)$ time. Finding the size of $S$ of at most $n$ elements takes time $O(n)$, Thus:
+					 \[
+						 T_{\texttt{IndependentSet-ThresholdDecision}} \leq O(n) + T(n,m) 
+					 \]
+				 \item The proof of correctness is that, if there exists an independent set of size at least $k$ in $G$, then the size of the largest independent set returned by \texttt{IndependentSet-OptimizationSearch} will either be greater than or equal to $k$, as it is the largest independent set. Thus, returning \texttt{YES} is a correct solution to the \texttt{IndependentSet-ThresholdDecision} problem. If $k$ is greater than the size of the independent set returned from \texttt{IndependentSet-OptimizationSearch}, then there does not exist an independent set of size at least $k$ in $G$, as the set $S$ returned by \texttt{IndependentSet-OptimizationSearch} is the largest independent set possible in $G$. In this case, the algorithm correctly returns \texttt{NO}. Thus, the reduction algorithm is correct.
+			\end{itemize}
+			We have shown that the reduction is correct and runs at $O(T(n,m))$.
+		\end{proof}
+	\item 
+	\begin{proof}
+		We first describe the algorithm:
+		\begin{itemize}
+			\item Set $\texttt{left} = 1$ and $\texttt{right} = n$.
+			\item While \texttt{left < right}:
+				\begin{itemize}
+					\item Set $\texttt{mid} = \ceil*{\frac{\texttt{left} + \texttt{right}}{2}}$.
+					\item Make an oracle call to \texttt{IndependentSet-ThresholdSearch($G$, \texttt{mid})}.
+					\item If the oracle does not return $\perp$, set $\texttt{left} = \texttt{mid}$.
+					\item If the oracle returns  $\perp$, set $\texttt{right} = \texttt{mid}$.
+				\end{itemize}
+			\item Return the set returned from the oracle.
+		\end{itemize}
+		We now want to prove our reduction algorithm:
+		\begin{enumerate}[1.]
+			\item has the desired runtime and
+			\item is correct.
+		\end{enumerate}
+		\begin{itemize}
+			\item For each iteration of the loop, we execute basic operations as well as one oracle call to \texttt{IndependentSet-ThresholdSearch} which runs in time at most $T(n,m)$ and thus the runtime for each iteration is $O(1) + O(T(n,m)) = O(T(n,m))$. As we implement binary search, there are at most $\log n$ iterations, and thus the total run time is
+				\[
+					T_\texttt{IndependentSet-OptimizationSearch} = O((\log n) \cdot (T(n,m)))
+				\] 
+			\item We will prove that the reduction algorithm is correct. Initially, $\texttt{left} = 1$ and $\texttt{right} = n$, as the size of an independent set is at least 1 and cannot be greater than the amount of vertices in $G$. The algorithm then enters a loop that performs binary search for the largest independent set size. The loop invariant is that $\texttt{left} < \texttt{right}$, and the loop will exit when $\texttt{left} = \texttt{right}$. From the loop invariant, with each iteration, we make an oracle call to \texttt{IndependentSet-ThresholdSearch} with inputs $G$ and $\texttt{mid}$, which is the average value in the current range from $\texttt{left}$ to \texttt{right}. If the oracle returns a set, then it follows that there exists an independent set that is of size $\texttt{mid}$ or greater, and thus we can shift our range to  \texttt{mid} to \texttt{right}. If the oracle returns $\perp$, then it follows that there does not exist an independent set that is at least size $\texttt{mid}$, and thus we can shift our range to \texttt{left} to \texttt{mid}. We repeat until we exit the loop. At this point, there does not exist an independent set of size greater than $\texttt{left} = \texttt{right}$, or an independent set of size less than $\texttt{left} = \texttt{right}$, which means that the set obtained when $\texttt{left} = \texttt{right}$ is the largest size for an independent set in $G$.
+		\end{itemize}
+		We have shown that the reduction algorithm is correct and runs at $O((\log n) \cdot T(n,m))$.
+	\end{proof}
+\item 
+	\begin{proof}
+		We first describe the algorithm:
+		\begin{itemize}
+			\item Initialize a set $S$ to store the independent set and set $\texttt{remaining\_size} = k$, where $k$ is the input threshold value for the algorithm. 
+			\item For each vertex $v$ in the graph $G$:
+				\begin{itemize}
+					\item If $\texttt{remaining\_size} = 0$, return $S$.
+					\item Create a copy of the graph $G'$ and remove $v$ and its neighbors. 
+					\item Make an oracle call to 
+
+						\texttt{IndependentSet-ThresholdDecision($G$, $\texttt{remaining\_size}-1$)}.
+					\item If the oracle returns \texttt{YES}, add $v$ to $S$ and update $\texttt{remaining\_size} = \texttt{remaining\_size} - 1$.
+				\end{itemize}
+			\item If $\texttt{remaining\_size} = 0$, then return $S$. Otherwise, return $\perp$.
+		\end{itemize}
+		We now want to prove our reduction algorithm:
+		\begin{enumerate}[1.]
+			\item has the desired runtime and
+			\item is correct.
+		\end{enumerate}
+		\begin{itemize}
+			\item In the worst case, we iterate over all the vertices in $G$ which takes time $O(n)$. For each vertex, we create a copy of the graph and remove its neighbors, which takes at most  $O(n + m + m) = O(n + m)$. For each vertex, we make an oracle call to \texttt{IndependentSet-ThresholdDecision} which runs in  $T(n,m)$ time. Thus, in total, the algorithm runs in time $O(n\cdot(m + T(n, m)))$, and as  $T(n,m) > m$, it follows that
+				\[
+					T_\texttt{IndependentSet-ThresholdSearch} = O(n\cdot(T(n,m)))
+				\] 
+
+	\item We will first prove the biconditional statement that $G$ has an independent set of size at least $k$  containing vertex $v$ $\iff$ $G - N(v)$ has an independent set of size at least $k-1$.
+		\\
+
+		($\implies$) Suppose $G$ has an independent set $S$ of size $k$ and let $v$ be a vertex in $S$. Then, if we remove $v$ along with the neighbors of $v$ to obtain $G - N(v)$, the remaining vertices in $G-N(v)$ are not connected to $v$ or each other, and thus they form an independent set. The size of this set is $k-1$, as we removed  a single vertex $v$ and we retain the original independent set besides $v$, and thus there exists an independent set of size at least $k-1$.
+		\\
+
+		($\impliedby$) Suppose $G - N(v)$ has an independent set $S$ of size at least $k-1$. If we add the vertex $v$ to the graph, then  $v$ will not be adjacent to any vertex in $S$, and thus an independent set $S' = S \unite \set*{v}$ will also be an independent set in $G$. The size of $S'$ will be $k$, as $|S| = k-1$ and we add an additional vertex $v$.
+		\\
+
+		We will now use this to prove the correctness of our algorithm. If, in any iteration, the oracle returns \texttt{YES} for $G - N(v)$ with $\texttt{remaining\_size} - 1$, there exists an independent set of size at least $\texttt{remaining\_size} - 1$ in the graph after removing $v$. This, in turn, implies that there might exist an independent set of size at least \texttt{remaining\_size} in the original graph $G$ containing vertex $v$. We start at $\texttt{remaining\_size} = k$ and decrement for each $v$ that are in an independent set of size $\texttt{remaining\_size}$, and thus if we reach  $\texttt{remaining\_size} = 0$, then all vertices we removed are part of an independent set of size at least $k$. Otherwise, we iterate until all vertices are exhausted and if $\texttt{remaining\_size} \neq 0$, in which it would return $\perp$, there are not enough vertices available to form an independent set of size at least k. 
+\end{itemize}
+We have shown that the reduction algorithm is correct and runs at $O(n\cdot(T(n,m)))$.
+	\end{proof}
+\end{enumerate}
+\end{document}

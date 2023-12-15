@@ -1,0 +1,174 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture 0, Tuesday, September 5, 2023 
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: September 13, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Google Search Algorithm}
+\begin{enumerate}
+	\item Calculate Page Rank $PR(\text{url})$ for each url. $PR(\text{url}) \in [0,1]$
+	\item Given search term $w$, find set $S_w$ of webpages that contain $w$ (They can cache this info and store page ranks for popular search terms $\to$ less computation)
+	\item Return list of urls in $S_w$ in \textit{descending} order of $PR(\text{url})$
+\end{enumerate}
+\section{The Sorting Problem}
+\textbf{Input:} An array $A$ of pairs of key-value pairs $((k_0,v_0),(k_1,v_1),...,(k_{n-1},v_{n-1}))$
+\begin{itemize}
+	\item Key is PR and value is url
+\end{itemize}
+\textbf{Output:} An array $A'$ of key-value pairs sorted $((k'_0,v'_0), (k'_1,v'_1),...,(k'_{n-1},v'_{n-1}))$
+
+\begin{definition}
+	[Sorted]
+Conditions needed to be sorted:
+\begin{enumerate}
+	\item Sorted by keys, i.e: $k'_0 \leq k'_1 \leq ... \leq k'_{n-1}$
+	\item $\exists$ permutation $\pi: [n] \to [n] \text{ st } (k'_i, v'_i) = (k_{\pi(i)}, v_{\pi(i)}) \forall i$
+	 \begin{notation}
+		[Subset of Natural Numbers]
+		As they are used quite often, we denote $[n]$ to mean the natural numbers up to $n$.
+	\end{notation}
+\end{enumerate}
+
+\end{definition}
+Currently in descending order. Set $k$ to be $1-PR$ and it will be in ascending order which is what we want
+\\
+
+\textbf{Issue:} If there are duplicate keys, then it is not unique. Sorting algorithm output can return them in any order and still satisfy these conditions.
+\subsection{Exhaustive-Search Sort (ESS)}
+For each permutation $\pi: [n] \to [n]$:
+	if $k_{\pi(0)} \leq k_{\pi(1)} \leq ... \leq k_{\pi(n-1)}$ then:
+		return $((k_{\pi(0)}, v_{\pi(0)}), (k_{\pi(1)},v_{\pi(1)}),...,(k_{\pi(n-1)}, v_{\pi(n-1)}))$
+\begin{itemize}
+	\item Check all permutations and return when reach a permutation where it is in ascending order
+\end{itemize}
+\textbf{Will it always return a correct answer?}
+\begin{itemize}
+	\item Goal of Correctness Proof: For every input, algorithm gives a valid output to complete the computational problem.
+\end{itemize}	
+\begin{enumerate}
+	\item For every input, $\exists$ valid output
+	\item If $\exists$ a valid output, ESS returns something
+	\item If ESS returns something, it returns something correct
+\end{enumerate}
+\begin{proof}
+	[Proof of Correctness of ESS]
+	We will not prove 1 as it is trivial. For 2, we cannot get past correct output without returning something. For 3, we only return when we checked if keys are in order and thus the return is the correct output.
+\end{proof}
+\subsection{Insertion Sort}
+For $i \in [n]$ :
+	put $A[i]$ into correct place (less than the following element and greater than or equal to preceding element) in $[A[0],...,A[i-1]]$
+return $A$
+\begin{proof}
+	[Proof of Correctness for Insertion Sort]
+	Prove by induction on $i$. Let $P(i)$ be the statement that, at the end of loop step $i$ of the loop, $[A[0],A[1],...,A[i]]$ is a correct sorting of first  $i+1$ elements.
+	\\
+
+	\textit{Base Case}: $i=0$,  $[A[0]]$ is a valid sort.
+	\\
+
+	\textit{Inductive Step}: Insert $A[i+1] = (k,v)$ into correct place in $[A[0],...,A[i]]$ which are correctly sorted by induction. 
+	\\
+
+	\textit{After Insertion}: 
+	\begin{itemize}
+		\item Inserting element doesn't change set of elements, ie. can modify permutation by inserting $i+1$
+		\item $k[0] \leq k[1] \leq ... \leq k[j] \leq k[j+1] \leq ... \leq k[i]$. By induction, it is in order except for $i$, and by inserting into the correct location, remains correct order.
+	\end{itemize}
+	$P(n)$ is the statement "when insertion sort finishes, it's correct."
+\end{proof}
+\begin{itemize}
+	\item	Note that here, $A[0]$ is being used to refer to the returned array. A more precise way is to use $A_i[k]$, which is the $k$th element at the $i$th iteration.
+\end{itemize}
+\end{document}

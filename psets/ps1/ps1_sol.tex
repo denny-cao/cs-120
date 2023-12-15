@@ -1,0 +1,212 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 1}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 1
+		\endgroup \vskip 0.3cm
+		Due: September 20, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Asymptotic Notation}
+\begin{ans} \
+	\begin{table}[h!]
+        \centering
+        \bgroup
+        \def\arraystretch{1.3}
+        \begin{tabular}{||c | c || c | c | c | c | c ||}
+         \hline
+         $f$ & $g$ & $O$ & $o$ & $\Omega$ & $\omega$ & $\Theta$ \\
+         \hline\hline
+         $e^{n^2}$ & $e^{2n^2}$ & T & T & F & F & F \\ \hline
+         $n^3$ & $n^{3/n}$ & F & F & T & T & F \\ \hline
+		 $n^{2+(-1)^n}$ & $\binom{n}{2}$ & F & F & F & F & F \\ \hline
+         $(\log {n})^{120}\sqrt{n}$ & $n$ & T & T & F & F & F \\ \hline
+         $\log(e^{n^2})$ & $\log(e^{2n^2})$ & T & F & T & F & T \\ \hline
+        \end{tabular}
+        \egroup
+    \end{table}
+\end{ans}
+\begin{ans} \
+
+By definition of Big $\Theta$, we know that $f(n) = \Theta(a^n) \to f(n) = O(a^n) \land f(n) = \Omega(a^n)$. By definition of Big $O$ and Big $\Omega$,  $f(n) = O(a^n) \to \exists c_1 > 0 \mid f(n) \leq c_1a^n$ for all $n$ greater than some  $k$ and $f(n) = \Omega(a^n) \to \exists c_2 > 0 \mid f(n) \geq c_2a^n$ for all $n$ greater than some $k$. We combine into the following inequality: 
+			\[
+			c_1a^n \leq f(n) \leq c_2 a^n
+			\] 
+			Similarly, $g(n) = \Theta (n^b) \to g(n) = O(n^b) \land g(n) = \Omega(n^b)$. Thus, $g(n) = O(n^b) \to \exists c_3 > 0 \mid g(n) \leq c_3n^b$ for all $n$ greater than some $k$ and $g(n) = \Omega(n^b) \to \exists c_4 > 0 \mid g(n) \geq c_4 n^b$ for all $n$ greater than some $k$. We combine into the following inequality:
+			\[
+			c_3n^b \leq g(n) \leq c_4n^b 
+			\] 
+			We will use these statements to prove the following:
+	\begin{itemize}
+		\item \textbf{$f(g(n)) = \Theta(a^{(n^b)})$ is false.}
+		\begin{proof}
+			[Proof by counterexample]
+			Let $f(n) = 2^n$ and  $g(n) = 10n^2$. We will show that $f(n) = \Theta(2^n)$. Let $c_1 = 1, c_2 =2$. Then, the following statement is true:
+				\[
+			2^n \leq f(n) \leq 2(2)^n
+			\] 
+			Thus, $f(n) = \Theta(2^n)$. We will show that  $g(n) = \Theta(x^2)$. Let $c_3 = 1, c_4 = 10$. Then, the following statement is true:
+			\[
+			n^2 \leq g(n) \leq 10n^2 
+			\] 
+			$f(g(n)) = 2^{10n^2} = {(2^{10})}^{n^2}$. Thus, $f(g(n)) \neq \Theta(2^{n^2})$, as there does not exist a $k_1$ and $k_2$ such that:
+			\[
+				f(g(n)) \leq k_2(2^{n^2})
+			\] 
+			Thus, $f(g(n)) \neq O(2^{n^2})$, which implies that  $f(g(n)) \neq \Theta(2^{n^2})$.
+		\end{proof}
+	\item  \textbf{$g(f(n)) = \Theta((a^n)^b)$ is true.}
+		\begin{proof}
+			Since for the composite $g(f(n))$, the least value of the input for  $g$ is the least value output for $f$ and the greatest value input for $g$ is the greatest value output for $f$ (Both functions are increasing), it is the case that:
+			\begin{gather*}
+				c_3 (c_1a^n)^b \leq g(f(n)) \leq c_4(c_1a^n)^b \\
+				c_3c_1^b(a^n)^b \leq g(f(n)) \leq c_4c_1^b(a^n)^b
+				\intertext{Let $r_1 = c_3c_1^b$ and $r_2 = c_4c_1^b$. Then:}
+				r_1(a^n)^b \leq g(f(n)) \leq r_2(a^n)^b
+			\end{gather*}
+		As $\exists r_2 > 0 \mid g(f(n)) \leq r_2(a^n)^b$, by definition of Big $O$, $g(f(n)) = O((a^n)^b)$. As $\exists r_1 > 0 \mid g(f(n)) \geq r_1(a^n)^b$, by definition of Big $\Omega$, $g(f(n)) = \Omega((a^n)^b)$. Thus, as $g(f(n)) = O((a^n)^b) \land g(f(n)) = \Omega((a^n)^b)$, by definition of Big  $\Theta$, $g(f(n)) = \Theta((a^n)^b)$.
+		\end{proof}
+	\end{itemize}
+\end{ans}
+\section{Understanding Computational Problems and Mathematical Notation}
+\begin{ans}
+	If the input is $(11,10,4)$, then the output will be  $(1,1,0,0)$. \texttt{BC}'s output is a valid solution for $\Pi$ with input $(11,10,4)$, as the output satisfies $f(11,10,4)$, as $1 + 1(10) + 0(100) + 0(1000) = 11 = n$.
+\end{ans}
+\begin{ans}
+
+\end{ans}
+\begin{ans}
+	When, for an $x = (n,b,k)$, $b < 2, b \in \nats$ ($b = 1$), or when $k$ is less than the amount of digits of $n$ expressed in base $b$.
+\end{ans} 
+\begin{ans}
+	$|f(x)| = 1$, as there are not multiple representations of a number in base  $b$ ; every number has a unique representation in base $b$.
+\end{ans}
+\begin{ans}
+	No, not every algorithm $A$ that solves $\Pi$ also solves $\Pi'$.
+	\begin{proof}
+		[Proof by counterexample]
+		We will show that there exists an algorithm $A$ that solves $\Pi$ but does not solve $\Pi$. By definition of an algorithm, an algorithm $A$ solves a computational problem $\Pi$ if $\forall x \in \mathcal{I} (f(x) \neq \emptyset \to A(x) \in f(x))$. \texttt{BC} solves $\Pi$. We will show that \texttt{BC} does not solve $\Pi'$. Let $x = (11,1, 10)$. In line 2 of \texttt{BC}, \texttt{if b < 2 then return} $\perp$. As  $b = 1$, \texttt{BC} will return $\perp$, and thus $f(x) = \emptyset$. However, for the same input, $f'(x) = \emptyset \unite \set*{(0,1,\dots,9)} = \set*{0,1,\dots,9}$. As \texttt{BC} will return $\perp$ and not $\set*{0,1,\dots,9}$, there exists an algorithm that solves $\Pi$ that does not solve $\Pi'$.
+	\end{proof}
+\end{ans}
+\section{Radix Sort}
+\begin{ans} (Proving Correctness of Algorithms)\ 
+	\begin{proof}
+		[Proof by Induction] We will prove the correctness of Radix Sort by induction on the number of iterations of the inner loop in the algorithm. Let $P(n)$ be the statement that, at every step $n$, the subintegers of the elements within the input array $A$ become correctly ordered based on their corresponding digits, proceeding from the least significant digit to the most significant digit. 		\\
+		
+		\textit{Base Case}: $n=0$. The 0th digit of the elements in $A$ are sorted.
+\\
+
+		\textit{Inductive Hypothesis}: Assume that after $i$ iterations of the inner loop (sorting based on the $i$-th least significant digit), the subintegers of the elements in the array $A$ are correctly ordered based on their first $i$ digits (from right to left). We will show that $P(i) \to P(i + 1)$.
+\\
+
+\textit{Inductive Step}:  After the $i+ 1$th iteration, the elements will be sorted based on the $i$th digit from the right. As we use \texttt{CountingSort} as a subroutine, and \texttt{CountingSort} is stable, the order will be preserved. As $P(i)$ is true, the elements of $A$ are correctly sorted on their first $i$ digits (from right to left). Thus, after the $i+1$th iteration, if two numbers differ at the $i$th digit from the right, then they are placed in correct order and if they have the same value, then their position remains unchanged since \texttt{CountingSort} preserves order. Thus, the elements of $A$ will become correctly sorted based on their first $i+1$ digits (from right to left).
+\\
+
+Thus, with induction, we have shown that Radix Sort correctly solves the Sorting Problem.
+	\end{proof}
+\end{ans}
+\begin{ans} (Analyzing Runtime) \
+	\begin{proof}
+		\texttt{CountingSort} takes $O(n + U)$ time when keys are drawn from a universe of size $U$. In \texttt{RadixSort}, \texttt{CountingSort} is used as a subroutine on a smaller universe, $b$. \texttt{CountingSort} is ran for each digit. Each key will have $\ceil*{\log U/\log b}$ digits in base $b$, as $\ceil*{\log U/\log b}$ will give the greatest power of $b$ that can be used to represent the largest value in the universe, $U$. The power will be the greatest amount of digits amongst all keys. As \texttt{CountingSort} is ran for each digit, there is a total running time of $(n+b)\ceil*{\log U/\log b}$. 
+		\\
+
+		The value of $b$ changes to minimize the expression depending on the values of $n$ and $U$. If $b = \min\{n,U\}$, then the expression will be: $O((n + n) (\log U / \log n)) = O(n\log U / \log n)$.
+	\end{proof}
+\end{ans}
+\begin{ans} (Implementing Algorithms) In \texttt{ps1.py}.
+\end{ans}
+\begin{ans} (Experimentally Evaluating Algorithms) 
+	The shapes of the resulting transition curves fit what asymptotic theory suggests. Around $2^5 = U$, there is a transition from \texttt{CountingSort} being more efficient to \texttt{MergeSort} being more efficient; asymptotic theory suggests that, with small values of $U$, \texttt{CountingSort} is more efficient and with larger values, \texttt{MergeSort} will be more efficient. Around the point where $U = n^{O(1)}$, \texttt{RadixSort} is most efficient, as it achieves runtime  $O(n)$ at that point.
+\end{ans}
+\end{document}
+

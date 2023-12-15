@@ -1,0 +1,339 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[linesnumbered,boxed]{algorithm2e}
+\usepackage{algpseudocode}
+
+%%% Coloring the comment as blue
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
+
+\SetKwInput{KwInput}{Input}                % Set the Input
+\SetKwInput{KwOutput}{Output}              % set the Output
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning,chains,fit,shapes,calc}
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+% CS 
+% NP
+\newcommand{\np}{\texttt{NP}_\texttt{search}}
+\newcommand{\p}{\texttt{P}_\texttt{search}}
+\newcommand{\nph}{\texttt{NP}_\texttt{search}\text{-hard}}
+\newcommand{\npc}{\texttt{NP}_\texttt{search}\text{-complete}}
+\newcommand{\EXP}{\texttt{EXP}_\texttt{search}}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 6}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 8
+		\endgroup \vskip 0.3cm
+		Due: November 29, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\makeatletter
+\newenvironment{algoproc}[1][]
+  {\renewcommand{\algorithmcfname}{Procedure}%
+   \begin{algorithm}[#1]
+   \long\def\@caption##1[##2]##3{%
+     \par
+     \begingroup\@parboxrestore
+     \if@minipage\@setminipage\fi
+     \normalsize \@makecaption{\AlCapSty{\AlCapFnt\algorithmcfname}}{\ignorespaces ##3}%
+     \par\endgroup
+   }}
+  {\end{algorithm}}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\textbf{Collaborators:}
+
+\textbf{No. of late days used on previous psets:} 3
+
+\textbf{No. of late days used after including this pset:} 6
+\section{Positive Monotone SAT}
+\begin{enumerate}[(a)]
+	\item 
+		\begin{proof}
+			Let $\Gamma = \texttt{$k$-False PositiveMonotoneSAT}$. 
+
+			We will show that $\Gamma$ is $\npc$ by showing that
+			\begin{enumerate}[1.]
+				\item $\Gamma \in \np$: 
+\begin{itemize}
+	\item Solutions are of polynomial size, as an assignment $\alpha$ is of $n$ variables that correspond to the value associated for each of the $n$ inputs.
+	\item Our verifier can check if at least $k = n/2$ variables are set to 0 in polynomial time $O(n)$ by iterating over an assignment $\alpha$ and incrementing a variable $\texttt{count}$ if the current literal is 0 and after iterating through $\alpha$, checking if $\texttt{count} \leq k$. We can then check if $\alpha$ satisfies the input to $\Pi$, the positive monotone CNF formula $\varphi$ (This uses the same verifier as for SAT, which from the Cook-Levin Theorem, is $\npc$) which will be polynomial time $O(m)$ where $m$ is the amount of clauses. Thus, it runs in polynomial time, as the total runtime is $O(n + m)$.
+\end{itemize}
+\item $\Gamma \in \nph$: Since every problem in $\np$ reduces to \texttt{SAT}, all we need to show is $\texttt{SAT}\leq_p \Gamma$ since reductions are transitive. We provide a reduction $R$:
+	\[
+	\texttt{SAT} \text{ instance } \varphi \xrightarrow[]{\text{polytime } R}
+\texttt{$k$-False PositiveMonotoneSAT} \text{ instance }\varphi'
+	\] 
+		We first describe the reduction $R$ for a \texttt{CNF} formula $\varphi(x_0, \dots, x_{n-1})$:
+		\begin{itemize}
+			\item Create new variables $x_0', \dots, x_{n-1}'$ to represent the negation of the literals $x_0, \dots, x_{n-1}$ respectively.
+			\item Form a new \texttt{CNF} formula $\varphi'$ by replacing all negated literals $\neg x_i, i \in [n]$ with $x_i'$ and adding a new clause $(x_i \lor x_i')$.
+			\item Make an oracle call to $\Gamma$ with instance $\varphi'$ and $k = n'/2 = n$, where $n' = 2n$ is the number of literals in $\varphi'$, as we keep the $n$ literals from $\varphi$ and add another literal corresponding to each.
+			\item If the oracle returns a satisfying assignment $\alpha'$ to $\varphi'$, we transform $\alpha'$ into a satisfying assignment $\varphi$. If it returns $\perp$, we return $\perp$.
+		\end{itemize}
+		\textbf{Runtime}: We check that $R$ runs in polynomial time. Creating $n$ literals takes $O(n)$ time. We then iterate over each clause of $\varphi$ and replace at most $n$ literals in each clause, and thus takes time $O(nm)$. We then add $n$ clauses for each $x_i, x_i'$ pair which takes $O(n)$ time. We assign the constant $k$ a value $n$ which takes $O(1)$. We then make a single oracle call taking $O(1)$ time. Thus, in total, the run time is $O(n) + O(nm) + O(n) + O(1) + O(1) = O(n(1 + m))$ which is polynomial time.
+
+		\begin{claim*}
+			If $\varphi$ is satisfiable, then $\varphi' = R(\varphi)$ is satisfiable.
+		\end{claim*}
+		\begin{subproof}
+			[Proof of claim]
+
+			As $R(\varphi)$ transforms the \texttt{CNF} formula by replacing negated literals $\neg x_i$ with $x_i'$, it follows that the assignment for $\varphi$ would satisfy $\varphi'$. 
+
+			$R(\varphi)$ then adds $n$ clauses of the form $(x_i \lor x_i')$. As $k = n$, there are at least $n$ literals that are 0. There are $2n$ literals with each of the $n$ clauses consisting of 2 literals, and thus each clause must have 1 literal that is 0 and the other that is 1, as if both are 0, then the clause would not be satisfied. If $x_i' = \alpha_i'$, then it follows that  $x_i = \neg \alpha_i'$, and thus $x_i'$ is in fact the negation of $x_i$. Thus, we have shown that the first $m$ clauses of $\varphi'$ are satisfied if $\varphi$, since $x_i'$ is the negation of $x_i$, and the last $n$ clauses are satisfied since one of $x_i$ and $x_i'$ is 1, and the other is 0.
+		\end{subproof}
+		\begin{claim*}
+			If $\alpha'$ satisfies $R(\varphi)$, then $\alpha' \mid_\varphi$ also satisfies $\varphi$, where $\alpha' \mid_\varphi$ is the restriction of the assignment $\alpha'$ to the variables in $\varphi$, and $\alpha' \mid_\varphi$ can be obtained in polynomial time.
+		\end{claim*}
+		\begin{subproof}
+			[Proof of claim]
+			Assume $\alpha' = (\alpha_0, \dots \alpha_{n-1}) \unite (\alpha_0', \dots, \alpha_{n-1}')$, where $\alpha_i$ is the assignment for $x_i$ and $\alpha_i' = \neg \alpha_i$ is the assignment for $x_i'$. Let $m$ be the number of clauses in $\varphi$. Then, $\varphi'$ will have $m + n$ clauses, as $R(\varphi)$ adds $n$ more clauses.
+		
+			Consider all assignments for $\varphi'$ $x_i = \alpha_i, x_i' = \neg \alpha_i, i \in [n]$. We guarantee that for all $x_i$, $x_i'$ is the corresponding negation through the last $n$ clauses of the form $(x_i \lor x_i')$ and assigning $k = 2n/2 = n$. In total, there are $2n$ literals, and this assignment of $k$ ensures that, for each clause $(x_i \lor x_i')$, if $x_i = \alpha_i$, then $x_i' = \neg\alpha_i$, as we join the $n$ clauses with $\land$ and thus by the Pigeonhole Principle, at least one of the variables must be true since $k = n$, meaning at least $n$ literals must be 0, and thus 1 literal in each clause will be 0 and the other will be 1.
+
+			As we have shown that $x_i = \neg x_i'$, it follows that, since the first $m$ clauses are the same as the clauses of $\varphi$ but the negations $\neg x_i$ replaced with $x_i'$, if we set $\alpha' \mid_\varphi = (a_0, \dots, a_{n-1})$, $\varphi$ will be satisfied. The removal of $\alpha_0', \dots, \alpha_{n-1}'$ takes polynomial time, as desired.
+		\end{subproof}
+	\end{enumerate}
+		This completes the proof that \texttt{$k$-False PositiveMonotoneSAT} is $\npc$.
+% \begin{algorithm}[!ht]                
+% \DontPrintSemicolon
+% $R(\phi):$
+% 
+%         \SetKwInOut{Output}{Output~}
+%         \SetKwInOut{Input}{Input~}
+% 		\SetKwInOut{Variables}{Variables~}
+% 		\Input{~A \texttt{CNF} formula $\phi(x_0, \dots, x_{n-1})$}
+% 		\Output{~A \texttt{PositiveMonotoneSAT} formula $\phi'$ and a value $k$}
+% 		\Variables{~$x_0', \dots, x_{n-1}'$ to represent the negation of each literal in $\phi$}
+% $\phi' = \phi$
+% \end{algorithm}
+		\end{proof}
+	\item 
+		\begin{proof}
+			We first prove the following claim:
+			\begin{claim*}
+				There exists an assignment $\alpha'$ satisfying the \texttt{CNF} formula consisting of exactly 3 variables as 0 if and only if there exists an assignment $\alpha$ satisfying the \texttt{CNF} formula consisting of at least 3 variables as 0.
+			\end{claim*}
+			\begin{subproof}
+				[Proof of claim]
+				We will prove the claim by proving both directions:
+
+				($\implies$) An assignment of 3 variables as 0 is an assignment of at least 3 variables as 0.
+
+				($\impliedby$) Assume there is an assignment of $x$ variables that are 0, $x \geq 3$. As it is a \texttt{CNF}, if a clause is satisfied where one variable is 0, the other must be 1. Thus, the clause will remain satisfied if we replace the variable assigned to 0 with an assignment to 1. We can do this for all variables equal to 0 until we reach only 3 variables assigned to 0.
+			\end{subproof}
+			Using the claim, we can solve \texttt{$k$-False PositiveMonotoneSAT} with $k=3$ by exhaustive search. We iterate through all possible combinations of setting 3 variables to 0, leaving the rest as 1. There are $n \choose 3$ possible combinations, and for each  combination we take $O(m)$ to verify if the assignment satisfies the \texttt{CNF} formula. Thus, the total runtime is
+			\begin{align*}
+			{n \choose 3} O(m) &= 
+				\frac{n!}{(n-3)!3!} O(m) \\
+								 &= \frac{n(n-1)(n-2)}{6} O(m) \\
+								 &= O(n^3)O(m) \\
+								 &= O(n^3m)
+			\end{align*}
+			As $O(n^3m)$ is polynomial time, we have shown that, if we fix  $k=3$, then $\texttt{$k$-False PositiveMonotoneSAT} \in \p$, and the proof is complete.
+		\end{proof}
+	\item 
+		\begin{proof}
+			Let $\Gamma = \texttt{$k$-False PositiveMonotone 2-SAT}$.
+
+			We will show that $\Gamma$ is $\npc$ by showing that:
+			\begin{enumerate}[1.]
+				\item $\Gamma \in \np$: We use the same verifier as from 1.a for \texttt{$k$=False PositiveMonotoneSAT} which will check if there are at least $k$ assignments with 0 and satisfies the \texttt{CNF} formula in polynomial time.
+				\item $\Gamma \in \npc$: Since every problem in $\np$ reduces to \texttt{Independent Set}, all we need to show is $\texttt{Independent Set} \leq_p \Gamma$ since reductions are transitive. We provide a reduction $R$:
+					\[
+						\texttt{Independent Set} \text{ instance } \varphi \xrightarrow[]{\text{polytime } R} \Gamma \text{ instance } \varphi'
+					\] 
+					We first describe the reduction $R$ for $\varphi(G,k)$, where $G$ is a graph and $k$ is the size of the independent set:
+					\begin{itemize}
+						\item We form a \texttt{CNF} formula $\phi = \displaystyle\bigwedge_{v_i, v_j \in E} (x_i \lor x_j)$. This represents each edge. If we restrict the \texttt{CNF} to have $k$ zeroes, then it will result in  an independent set of size $k$, as, for $k$ edges, only one of the two vertices are 0. We can thus create an instance $\varphi'(\phi, k)$.
+						\item Make an oracle call to $\Gamma$ on $\varphi'$. If the oracle returns a satisfying assignment, we select only $k$ variables to set to 0 (if there are more than $k$) and then return an independent set $S = \set*{v_i \mid \alpha_i = 0}$. If the oracle returns $\perp$, then return $\perp$.
+					\end{itemize}
+					\textbf{Runtime}: We check that $R$ runs in polynomial time. To create the \texttt{CNF}, we iterate through all edges to create clauses, taking time $O(|E|)$. Setting $k$ takes $O(1)$. Iterating through all vertices for post-processing takes time $O(|V|)$, and thus in total, the runtime is $O(|E| + |V|)$ which is polynomial time.
+					\begin{remark*}
+					No time for proof of correctness :(		
+					\end{remark*}
+					\begin{claim*}
+						If $\varphi$ has a solution, then $\varphi' = R(\varphi)$ is satisfiable.
+					\end{claim*}
+					\begin{claim*}
+						If $\alpha$ satisfies $R(\varphi)$, then $\alpha' \mid_\varphi$ is a solution for $\varphi$, where $\alpha \mid_\varphi$ is the conversion from $\alpha$ to an independent set, and $\alpha \mid_\varphi$ can be obtained in polynomial time.
+					\end{claim*}
+					This completes the proof that \texttt{$k$-False PositiveMonotone 2SAT} is $\npc$.
+			\end{enumerate}
+		\end{proof}
+\end{enumerate}
+\section{Reductions and Complexity Classes}
+\begin{enumerate}[(a)]
+	\item 
+		\begin{proof}
+			If $\Pi \in \p$, then there exists a program $P$ that can solve $\Pi$ in polynomial time. Let $G$ be an oracle that can solve $\Gamma$. Then, we can solve $\Pi$ by calling $G$ once and then running $P$. 
+			
+			\textbf{Correctness}: The proof of correctness is that we call $G$ but do not use the output, and then run $P$ which solves $\Pi$.
+
+			\textbf{Runtime}: The oracle call takes $O(1)$, and then $P$ runs in polynomial time, and thus the total runtime is polynomial time.
+
+			Thus, if $\Pi \in \p$, then $\Pi \leq_p \Gamma$, and the proof is complete.
+		\end{proof}
+	\item 
+		\begin{proof}
+			Assume $\np \subseteq \p$. Then, for all computational problems $\Pi \in \np$, it follows that $\Pi \in \p$. To prove that, if $\Pi \in \np$ then  $\Pi \in \npc$, we must show that:
+			\begin{enumerate}[1.]
+				 \item $\Pi \in \np$: We know $\Pi \in \np$.
+				 \item  $\Pi \in \nph$: From the previous question, 2.1, we know that, if $\Pi \in \p$, then $\Pi \leq_p \Gamma$. From our assumption, every problem $\Pi$ in $\np$ is in $\p$, and thus every problem in $\np$ can reduce to every other problem in $\np$, and thus all problems in $\np$ are $\nph$.
+			\end{enumerate}
+			This completes the proof that, if $\np \subseteq \p$, then all problems in $\np$ are $\npc$.
+		\end{proof}
+	\item 
+		\begin{proof} \
+
+			\textbf{Reduction}: Since $\Pi$ reduces in polynomial time to $\Gamma$, there exists a reduction $R$ solving $\Gamma$ which runs in time $O(n^c)$ for some $c$ on inputs of size $n$ given an oracle that solves $\Gamma$.
+				
+			\textbf{Algorithm, by oracle replacement}: We assume that $\Gamma \in \EXP$, or for some constant $d$, there is an $O(2^{n^d})$ algorithm $A$ solving $\Gamma$ on inputs of length $n$. Then, we can create an algorithm that, given an input $x$ to $\Pi$, runs $R$ on $x$. Whenever $R$ calls the oracle on a value $y_i$, we instead evaluate $A(y_i)$.
+
+			\textbf{Overall runtime}: Since $R$ runs in time $O(n^c)$ and calls the oracle at most once per step, it makes at most $O(n^c)$ calls to the oracle. If each of those calls takes time at most $B$, then the overall runtime, including reduction and oracle calls, is
+			\[
+			O(n^c + n^c \cdot B)
+			\] 
+			We now bound $B$ for the oracle calls.
+
+			Since $R$ starts with memory of size $n$, runs in time $O(n^c)$, and increases the size of memory by at most $w$ bits per \texttt{MALLOC} call, the size of $R$'s memory is at most $O(n + n^cw)$. As the initial word size $w_0$ is at most $n+1$ and $w$ increases by at most 1 per \texttt{MALLOC} call, after $O(n^c)$ steps, we will have $w \leq O(n^c)$. Thus, the size of memory is always $O(n^cn^c) = O(n^{2c})$. As each oracle calls' input is a subset of the memory, each oracle call is on an input of size at most $O(n^{2c})$ as well.
+
+			With an input size of $O(n^{2c})$, the algorithm $A$ which we replaced the oracle with runs in time $O(2^{({n^{2c})}^d})$. We substitute this bound for $B$, giving a runtime bound of 
+			\[
+			O(n^c + n^c \cdot (2^{({n^{2c})}^d})) = O(n^c {2^{(n^{2c})}}^d)
+			\] 
+			which is exponential, and the proof is complete.
+		\end{proof}
+\end{enumerate}
+\section{Variant of VectorSubsetSum}
+\begin{proof}
+	Let $\Pi = \texttt{VectorSubsetSum}$ and  $\Gamma = \texttt{VectorSubsetSumVariant}$.
+
+	We will show that  $\Gamma$ is $\npc$ by showing that
+	\begin{enumerate}[1.]
+		\item $\Gamma \in \np$: 
+			\begin{itemize}
+				\item Solutions are of polynomial size, as the size of the vector subset $S$ is bounded by $n$ since  $S \subseteq [n]$.
+				\item Our verifier can check if a vector subset $S$ by summing corresponding entries for each vector and checking if the sum is equal to the corresponding entry for $t_0$. This takes $O(nd)$ time, as we sum $n$ entries for each dimension of the vectors, which is polynomial time.
+			\end{itemize}
+		\item $\Gamma \in \nph$: Since \texttt{VectorSubsetSum} is $\npc$, it follows that every problem in $\np$ reduces to \texttt{VectorSubsetSum}, and thus all we need to show is that $\texttt{VectorSubsetSum} \leq_p \Gamma$ since reductions are transitive. We provide a reduction $R$:
+			 \[
+				 \texttt{VectorSubsetSum} \text{ instance } \varphi \xrightarrow[]{\text{polytime } R} \texttt{VectorSubsetSumVariant} \text { instance } \varphi'
+			\] 
+			We first describe the reduction $R$ for instance $\varphi$ with vectors $\vec{v}_0, \dots, \vec{v}_{n-1}, \vec{t}$:
+			\begin{itemize}
+				\item Add an additional coordinate 0 for each vector $\vec{v_i}, i \in [n]$, extending the dimension of each vector from $d$ to $d+1$ to form $\vec{v'_i}$. Thus, $\vec{v_i'}[d] = 0$.
+				\item Find $m = \max({\vec{t}[0], \dots, \vec{t}[n-1]})$ and create a new vector $\vec{t'}$ of length $d+1$ and set each entry to $m$.
+				\item Add a new vector $\vec{v'_n}$ by adding an additional coordinate to $\vec{t}$, $\vec{t}[d] = 0$ and then computing coordinate-wise subtraction $\vec{t'} - \vec{t}$. Thus
+					\begin{align*}
+						\vec{v'_n}[0] &= \vec{t'}[0] - \vec{t}[0] \\
+						&\vdotswithin{ = } \\
+						\vec{v'_n}[d] &= \vec{t'}[d] - \vec{t}[d]
+					\end{align*}
+		\item Make an oracle call to $\Gamma$ with instance $\varphi'$ with $\vec{v'}_0, \dots, \vec{v'}_{n-1}, \vec{v'}_n, \vec{t'}$.
+		\item If the oracle returns a subset $S'$ to $\varphi'$, we transform $S'$ into a subset for $\varphi$. If it returns $\perp$, we return $\perp$.
+			\end{itemize}
+			\textbf{Runtime}: We check that $R$ runs in polynomial time. Adding an additional coordinate for vectors $\vec{v_i}, i \in [n]$ to form $\vec{v'_i}$ as well as adding an additional coordinate for $\vec{t}$ to be used to form $\vec{v'_n}$ takes time $O(n)$. Finding the maximum value of the entries for  $\vec{t}$ takes time $O(d)$, and we create $\vec{t'}$ by setting all $d+1$ entries to $m$ which takes $O(d)$ time. Subtracting $\vec{t'}$ and  $\vec{t}$ to form  $\vec{v_n'}$ takes time $O(d)$. We make a single oracle call taking $O(1)$ time. Thus, in total, the run time is $O(n) + O(d) + O(d) + O(d) + O(1) = O(n + d)$, which is polynomial time.
+			\begin{claim*}
+				If $\varphi$ has a solution, then $\varphi' = R(\varphi)$ has a solution.
+			\end{claim*}
+			\begin{subproof}
+				[Proof of claim]
+				If $\varphi$ has a solution, then if we set $\vec{t}$ to a vector $\vec{t'}$ where all entries are the same, we add a vector $\vec{v_n}$ to $\vec{t}$, where the entries no longer need to be in $\set*{0,1}$. Thus, if we add $\vec{v_n}$ to the solution set $S$, then it will satisfy $\varphi'$. We add an additional coordinate to the vectors, where for $\vec{v_i}, i \in [n]$ we add 0, and for $\vec{v'_n}$ as well as $\vec{t'}$ we add $m$. For this dimension, the sum will still remain $m$, as $0 + \dots + 0 + m = m$, which is the value of $\vec{v_n'}[d]$ and thus $\varphi'$ still has a solution.
+			\end{subproof}
+			\begin{claim*}
+				If $\varphi'$ has a solution, then $\varphi$ has a solution and we can transform valid solutions to $\varphi'$ into valid solutions to $\varphi$ in polynomial time.
+			\end{claim*}
+			\begin{subproof}
+				[Proof of claim]
+				If $\varphi'$ has a solution, then if we subtract $\vec{t'}$ by the vector whose last coordinate is equal to $m$ and then remove the last coordinate, we can obtain a vector $\vec{t}$. We can then remove that vector from the solution set $S'$ and then remove the last coordinate for all remaining vectors to obtain a solution set $S$ for $\varphi$ on $\vec{t}$.
+
+				The solution set $S'$ has at most $n+1$ vectors, and thus we can bound the time it takes to find the vector $\vec{v_i'}$ where $\vec{v_i'}[d] = m$ by $O(n)$. Subtracting this vector from $\vec{t'}$ will take $O(d)$, and then removing the vector $\vec{v_i'}$ from $S'$ as well as removing the last coordinate for all remaining vectors will take $O(n)$, and thus the total runtime is $O(n) + O(d) + O(n) = O(n + d)$, which is polynomial time.
+			\end{subproof}
+			This completes the proof that \texttt{VectorSubsetSumVariant} is $\npc$.
+	\end{enumerate}
+\end{proof}
+\end{document}

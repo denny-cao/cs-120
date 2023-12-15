@@ -1,0 +1,17 @@
+# Fdb version 4
+["pdflatex"] 1693360914 "ps0.tex" "ps0.pdf" "ps0" 1693360915 2
+  "/usr/local/texlive/2023/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmr10.tfm" 1136768653 1296 45809c5a464d5f32c8f98ba97c1bb47f ""
+  "/usr/local/texlive/2023/texmf-dist/tex/latex/base/article.cls" 1667332637 20144 d5ecf0a5140c8d8d8b72cbe86e320eff ""
+  "/usr/local/texlive/2023/texmf-dist/tex/latex/base/size11.clo" 1667332637 8464 63bf71cc1214ffdd38288da73a7ca182 ""
+  "/usr/local/texlive/2023/texmf-dist/web2c/texmf.cnf" 1677365944 40745 87bb86a62d462f93a1efc6b0c65c872e ""
+  "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1691249112 7883462 c2d7977eb14631b8f29056ae998dcde3 ""
+  "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
+  "Fall23/classTools.sty" 0 -1 0 ""
+  "ps0.aux" 1693360914 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "ps0.tex" 1693360879 11711 fbb2a40ae57709787371d5a5f5880b9f ""
+  (generated)
+  "ps0.aux"
+  "ps0.log"
+  "ps0.pdf"
+  (rewritten before read)

@@ -1,0 +1,315 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[noend,linesnumbered,boxed]{algorithm2e}
+\usepackage{algpseudocode}
+
+%%% Coloring the comment as blue
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
+
+\SetKwInput{KwInput}{Input}                % Set the Input
+\SetKwInput{KwOutput}{Output}              % set the Output
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning,chains,fit,shapes,calc}
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+% CS 
+% NP
+\newcommand{\np}{\texttt{NP}_\texttt{search}}
+\newcommand{\p}{\texttt{P}_\texttt{search}}
+\newcommand{\nph}{\texttt{NP}_\texttt{search}\text{-hard}}
+\newcommand{\npc}{\texttt{NP}_\texttt{search}\text{-complete}}
+\newcommand{\EXP}{\texttt{EXP}_\texttt{search}}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 6}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 9
+		\endgroup \vskip 0.3cm
+		Due: December 6, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\makeatletter
+\newenvironment{algoproc}[1][]
+  {\renewcommand{\algorithmcfname}{Procedure}%
+   \begin{algorithm}[#1]
+   \long\def\@caption##1[##2]##3{%
+     \par
+     \begingroup\@parboxrestore
+     \if@minipage\@setminipage\fi
+     \normalsize \@makecaption{\AlCapSty{\AlCapFnt\algorithmcfname}}{\ignorespaces ##3}%
+     \par\endgroup
+   }}
+  {\end{algorithm}}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\textbf{Collaborators:}
+
+\textbf{No. of late days used on previous psets:} 6
+
+\textbf{No. of late days used after including this pset:} 7
+\section{$\p \not\subseteq \np$}
+\begin{claim*}
+	$\Pi \in \p$.
+\end{claim*}
+\begin{proof}
+	[Proof of claim]
+	To show that $\Pi$ is in $\p$, we show that there exists a Word-RAM program $P$ such that $f(P)$ can be found in polynomial time. Let $P$ be the Word-RAM program that returns whether or not an input $x \in \nats$ is at least 1:
+\begin{algorithm}[h]                
+        \SetKwInOut{Output}{Output~}
+        \SetKwInOut{Input}{Input~}
+		\SetKwInOut{Variables}{Variables~}
+		\Input{~An input $x$ occupying memory location $M[0]$}
+		\Output{~A value $y \in \set*{\texttt{0},\texttt{1}}$ in memory location $M[0]$}
+		\Variables{~\texttt{input\_len}, \texttt{output\_len}, \texttt{output\_ptr}, \texttt{zero}, \texttt{word\_len}, \texttt{mem\_size}}
+		\texttt{zero} = 0\texttt{;} \\
+		\texttt{output\_len} = \texttt{input\_len} + \texttt{zero}\texttt{;} \\
+		\texttt{output\_ptr} = 0\texttt{;}\\
+		\textbf{if} $M[\texttt{output\_ptr}] >= 1$ \textbf{GOTO} \ref{6} \texttt{;} \\
+		\textbf{if} $\texttt{zero} == 0$ \textbf{GOTO} \ref{7} \texttt{;}\\
+		$M[\texttt{output\_ptr}] = 1$ \label{6} \texttt{;} \\
+		\textbf{HALT}\label{7} \texttt{;}
+		\caption{Word-RAM Program $P$}
+\end{algorithm}
+
+We verify that $f(P)$ can be found in polynomial time. We break inputs $\varepsilon \in \nats$ for $P$ into two cases:
+\begin{enumerate}[1.]
+	\item $\varepsilon \geq 1$: The total operations performed in this case is 6 regardless of the amount of bits to represent $\varepsilon$ in the Word-RAM program, and thus takes time $O(1)$.
+	\item $\varepsilon= 0$: The total operations performed in this case is also 6, and thus takes time $O(1)$.
+\end{enumerate}
+As in both cases, $P$ halts in $O(1)$ and $P$ halts for all $\varepsilon \in \nats$, it follows that, for all inputs $\varepsilon$ for $P$, $f(P) = \set*{\texttt{0}, \texttt{1}}$ and can be found in $O(1)$ time which is polynomial time, and the proof is complete.
+\end{proof}
+\begin{claim*}
+	$\Pi \not\in \np$. 
+\end{claim*}
+\begin{proof}
+	[Proof of claim]
+	To show that $\Pi \not\in \np$, we show that there exists a Word-RAM program $P$ such that a solution $x$ cannot be verified in polynomial time. Let $P$ be the Word-RAM program as follows:
+
+\begin{algorithm}[H]                
+        \SetKwInOut{Input}{Input~}
+		\SetKwInOut{Variables}{Variables~}
+		\Input{~An input $x$ occupying memory location $M[0]$}
+		\Variables{~\texttt{input\_len}, \texttt{output\_len}, \texttt{output\_ptr}, \texttt{zero}, \texttt{word\_len}, \texttt{mem\_size}}
+		\texttt{zero} = 0\texttt{;} \\
+		\texttt{output\_len} = \texttt{input\_len} + \texttt{zero}\texttt{;} \\
+		\texttt{output\_ptr} = 0\texttt{;}\\
+		\textbf{if} $\texttt{zero} == 0$ \textbf{GOTO} \ref{4} \label{4} \texttt{;}\\
+		\textbf{HALT}\texttt{;}
+		\caption{Word-RAM Program $P$}
+\end{algorithm}
+Consider the case when the verifier $V$ must verify if a solution $x = \texttt{0}$ is correct for $P$. This will only happen if $P$ does not halt. However, if $P$ does not halt, then the verifier $V$ would run indefinitely, and thus $V$ would not run efficiently in polynomial time, and the proof is complete.
+\end{proof}
+\section{Undecidability of Arithmetic Overflows}
+\begin{enumerate}[(a)]
+	\item 
+		\begin{proof}
+			Let $P'$ be a Word-RAM equivalent program for a RAM program $P$. We form a new program $P''$ where integer overflows cannot occur by an algorithm $\varphi = \texttt{ConvertNoOverflowP}$ which takes $P'$ as input. We describe $\varphi$:
+\begin{algorithm}                
+	\caption{\texttt{ConvertNoOverflowP}}
+  \SetKwInOut{Input}{inputs}
+  \SetKwInOut{Output}{output}
+  \SetKwProg{ConvertNoOverflowP}{ConvertNoOverflowP}{}{}
+
+  \ConvertNoOverflowP{$(P'(V', (C'_0, \dots, C'_{\ell-1})))$}{
+	 $C'' = (\ )$;\\
+ 	 \ForEach{$i \in [\ell]$}{%
+		 \If{$C'_i$ in the form $\texttt{\upshape var}_i = \texttt{\upshape var}_j + \texttt{\upshape var}_k$ or $\texttt{\upshape var}_i = \texttt{\upshape var}_j \times \texttt{\upshape var}_k$}{%
+			 $\texttt{start}_j = \texttt{len($C''$)} + 3$;
+
+			 $\texttt{start}_k = \texttt{len($C''$)} + 5$;
+
+			 $\texttt{end}_j = \texttt{len($C''$)} + 15$;
+
+			 $\texttt{end}_k = \texttt{len($C''$)} + 13$;
+				
+			 $\texttt{end}_S = \texttt{len($C''$)} + 10$;
+
+			 $C''\texttt{.append($\texttt{counter}_j = \texttt{0}$)}$;
+
+			 $C''\texttt{.append($\texttt{counter}_S = \texttt{0}$)}$;
+
+			 $C''\texttt{.append($\texttt{IF } \texttt{counter}_j == \texttt{var}_j \texttt{ GOTO } \texttt{end}_j$)}$;
+
+			 $C''\texttt{.append($\texttt{counter}_k = \texttt{0}$)}$;
+
+			 $C''\texttt{.append($\texttt{IF } \texttt{counter}_k == \texttt{var}_k \texttt{ GOTO } \texttt{end}_k$)}$;
+
+			 $C''\texttt{.append($\texttt{IF } \texttt{counter}_S == S \texttt{ GOTO } \texttt{end}_S$)}$;
+			 
+			 $C''\texttt{.append($\texttt{counter}_S = \texttt{counter}_S + \texttt{one}$)}$;
+
+			$C''\texttt{.append($\texttt{counter}_k = \texttt{counter}_k + \texttt{one}$)}$;
+
+	 $C''\texttt{.append($\texttt{IF } \texttt{zero} == \texttt{0} \texttt{ GOTO } \texttt{start}_k$)}$;
+
+			 $C''\texttt{.append(MALLOC())}$;
+
+
+			 $C''\texttt{.append($\texttt{counter}_k = \texttt{counter}_k + \texttt{one}$)}$;
+
+			 $C''\texttt{.append($\texttt{IF } \texttt{zero} == \texttt{0} \texttt{ GOTO } \texttt{start}_k$)}$;
+
+			 $C''\texttt{.append($\texttt{counter}_j = \texttt{counter}_j + \texttt{one}$)}$;
+
+			 $C''\texttt{.append($\texttt{IF } \texttt{zero} == \texttt{0} \texttt{ GOTO } \texttt{start}_j$)}$;
+    }
+	$C''\texttt{.append($C'_i$)}$;
+}
+	\KwRet{$P(V+3,C'')$};
+}\end{algorithm}
+
+For $P'$, integer overflow occurs when an operation $\texttt{var}_j \texttt{ op } \texttt{var}_k$ results in a value greater than or equal to $2^w$, where $w = \texttt{word\_len}$.
+	We bound the greatest value of $\texttt{var}_j \texttt{ op } \texttt{var}_k$ by the maximum value of  $\texttt{var}_j \times \texttt{var}_k$, as multiplication will result in the largest value. We can thus bound the number of bits needed to represent an operation without integer overflow with
+			\[
+				\ceil*{\log_2(\texttt{var}_j \texttt{ op } \texttt{var}_k)} \leq \ceil*{\log_2(\texttt{var}_j \times \texttt{var}_k)}
+			\] 
+		We can avoid integer overflow by calling \texttt{MALLOC} $m$ times if $\texttt{var}_j \texttt{ op } \texttt{var}_k \geq 2^w$. The amount of times we call \texttt{MALLOC} will be 
+					\[
+	m =						\texttt{var}_j \times \texttt{var}_k - S
+					\] 
+					As $w = \floor{\log \max \set*{S, x[0], \dots, x[n-1]}}$, and thus  $w \geq \log S$, where $S$ is the length of memory, if we call \texttt{MALLOC} $\texttt{var}_j \times \texttt{var}_k - S$ times prior to $\texttt{var}_j \texttt{ op } \texttt{var}_k$, we will obtain a new value for $S$, $S'$, such that $S' \geq \texttt{var}_j \texttt{ op } \texttt{var}_k$. This is because, with each \texttt{MALLOC} call, we increment $S$ by 1.
+					
+From Theorem 7.1 in Lecture 7, for every RAM program $P$, there exists a Word-RAM Program $P'$ such that $P'$ halts on $x$ if and only if $P$ halts on $x$, and if they halt, then $P'(x) = P(x)$. It follows then that, if we show that, for every Word-RAM Program $P'$ there exists a Word-RAM Program $P''$ such that $P'$ halts on $x$ if and only if $P'$ halts on $x$, and if they halt, then $P''(x) = P'(x)$, by transitivity of biconditional statements, our proof is complete.
+		\end{proof}
+	\item 
+		\begin{proof}
+			It suffices to show that \texttt{HaltOnEmpty} reduces to \texttt{ArithmeticOverflow}, or that there is an algorithm $A$ that solves \texttt{HaltOnEmpty} given an oracle for \texttt{ArithmeticOverflow}. We describe the reduction below:
+\begin{algorithm}                
+	\caption{Reduction from \texttt{HaltOnEmpty} to \texttt{ArithmeticOverflow}}
+  \SetKwInOut{Input}{Input~}
+  \SetKwInOut{Output}{Output~}
+  $A(P)$:
+
+  \Input{~A RAM program $P$}
+  \Output{~\texttt{yes} if $P$ halts on $\varepsilon$, \texttt{no} otherwise}
+  Construct from $P$ a RAM program $Q_P$ such that $Q_P$ overflows on $\varepsilon$ if and only if $P$ halts on $\varepsilon$;
+
+	Run the \texttt{ArithmeticOverflow} oracle on $Q_P$ and return its result;
+\end{algorithm}
+
+We construct $Q_P$ as follows:
+
+\begin{algorithm}[H]
+  $Q_P(P)$:
+
+  $P' = \texttt{ConvertNoOverflowP($P$)}$;
+  
+  $C'' = (\ )$;
+
+	$\texttt{end} = \texttt{len($P'.C$)}$;
+
+  $C''\texttt{.append($\texttt{x} = 2$)}$;
+
+	  $C''\texttt{.append($\texttt{counter} = 0$)}$;
+
+	  $C''\texttt{.append($\texttt{IF } \texttt{counter} == \texttt{word\_len} \texttt{ GOTO } \texttt{end} + 7$)}$;
+
+	  $C''\texttt{.append($\texttt{x} = \texttt{x} \times 2$)}$;
+
+	  $C''\texttt{.append($\texttt{counter} = \texttt{counter} + 1$)}$;
+
+	  $C''\texttt{.append($\texttt{IF } \texttt{zero} == 0 \texttt{ GOTO } \texttt{end} + 3$)}$;
+
+	  $C''\texttt{.append(HALT)}$;
+		
+	  $Q_P = P'$;
+
+	  \ForEach{$i \in [7]$}{
+		  $Q_P.C$\texttt{.append($C''_i$)};
+	  }
+	  \KwRet{$Q_P$;}
+	  \caption{The RAM Program $Q_P$ constructed from $P$}
+\end{algorithm}
+
+\begin{claim*}
+	$Q_P$ overflows on $\varepsilon$ if and only if  $P$ halts on $\varepsilon$.
+\end{claim*}
+\begin{subproof}
+	[Proof of claim]	
+	We construct $Q_P$ by first creating an equivalent Word-RAM program $P'$ for $P$ such that there will be no integer overflows for operations by calling $\texttt{ConvertNoOverflowP($P$)}$ from Question 2.a. As $P'$ can still overflow by setting a variable to a value larger than $2^w$, we set a variable $x = 2^{w+1}$ if $P'$ halts. As $P'$ by construction does not result in overflows otherwise, by adding $C''$, we ensure that it halts if and only if it overflows
+\end{subproof}
+The claim implies that plugging this construction of $Q_P$ into Algorithm 4 gives a correct reduction from \texttt{HaltOnEmpty} to \texttt{ArithmeticOverflow}, and thus completes the proof that \texttt{ArithmeticOverflow} is unsolvable.
+		\end{proof}
+\end{enumerate}
+\end{document}

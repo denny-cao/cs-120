@@ -1,0 +1,203 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+% Computational Problem Shortcuts
+\newcommand{\I}{\mathcal{I}}
+
+% Empty Set
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture :  --- Tuesday November 7, 2023
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: November 15, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Church-Turing Thesis}
+\begin{claim}
+	[Extended Church-Turing Thesis]
+	Every physically realizable \textit{deterministic sequential} model of computation is simulable by Word-RAM \textit{with at most polynomial slowdown}.
+\end{claim}
+\section{Problem-Independent Size Measure}
+\begin{itemize}
+	\item Measure input size in bits to ecode
+\end{itemize}
+\begin{example}
+	Graph w/$|V| = n, |E| = m$
+\end{example}
+\begin{itemize}
+	\item $(1+m)\log n = N$
+\end{itemize}
+\begin{example}
+	3-SAT formula: $n$ variables and $m$ clauses.
+\end{example}
+\begin{itemize}
+\item For each $m$ clause, need what each of the variables are and if they are negated. $m\cdot 3 \cdot (1 + \log n)$, must specify each of the iterals, for each iteral, need 1 bit for if negated, and a variable or their negation.
+\end{itemize}
+\begin{example}
+	Array of size $n$ from a universe $[U]$.
+\end{example}
+\begin{itemize}
+	\item $n \log U = N$
+	\item Thus, \texttt{RadixSort} is time $O(N + 2^N)$ (find explanation for why $2^N$, but it had something to do with how we can find the upperbound of $\log N$ or something)
+\end{itemize}
+\begin{lemma}
+	[Reductions]
+	If $\Pi \leq_{T,f} \Gamma$, then:
+	\begin{itemize}
+		\item $\exists$ alg solving $\Gamma$ in time $g(n) \to \exists$ alg solving $\Pi$ in time $O(g(f(n) + T(n)))$.
+		\item Contrapositive: $\not\exists$ alg solving $\Pi$ in time $O(g(f(n)) + T(n))\to \not\exists$ alg solving $\Gamma$ in time $O(g(n))$
+	\end{itemize}
+\end{lemma}
+\begin{itemize}
+	\item If only polynomial runtimes, easier lemma
+\end{itemize}
+\begin{lemma}
+	[Simpler Lemma w/Polynomial Time Complexity]
+	If $\Pi \leq \Gamma$, then:
+	\begin{itemize}
+		\item $\exists$ alg solving $\Gamma$ in time something polynomial $n^{O(1)} \to \exists$ alg solving $\Pi$ in polynomial time $n^{O(1)}$.
+		\item Contrapositive: $\not\exists$ alg solving $\Pi$ in $n^{O(1)} \to \not\exists$ alg solving $\Gamma$ in $n^{O(1)}$.
+	\end{itemize}
+\end{lemma}
+\begin{proof}
+	Reduction $R$ from $\Pi$ to $\Gamma$ which runs in time $O(n^c)$ for some $c$. The reduction gives an algorithm by oracle replacement. Suppose $\Gamma \in \text{TIME}(n^d)$. We replace oracle calls with runs of  $O(n^d)$, giving an algorithm that solves $\Pi$ with runtime:
+	\begin{itemize}
+		\item Reduction: $O(n^c)$
+		\item Number of oracle calls: $O(n^c)$. We cannot now just substitute $n^c$ for  $n$ for the oracle replacement, as the size may be bigger
+		\item Size of memory starts at $\leq n$, grows at $\leq 1$ per step, thus \texttt{mem\_size} $\leq n^c \to $ all oracle calls are of size $\leq n^c$.
+		\item Now, we can find upperbound of each oracle call runtime: maximum size of $n$: $O((n^{c})^d)$, thus total runtime of oracle calls is $O(n^{cd + c})$
+	\end{itemize}
+\end{proof}
+\begin{remark}
+	We made the proof easier; there is something to fill in for when we call MALLOC, as MALLOC does not just grow memory by 1---could be an entire word for example.
+\end{remark}
+\begin{remark*}
+	Can 3-coloring be solved in polynomial time?
+\end{remark*}
+\begin{theorem}
+	The problem \texttt{HALT-IN-$2^n$}, whose input is a Word-RAM program $P$, $n \in \nats$ and output $\texttt{True} \iff P$ runs in time $\leq 2^n$ on all inputs of size $n$, then the \textbf{problem cannot be solved in polynomial time}.
+\end{theorem}
+\begin{proof}
+	CS 121 :D
+\end{proof}
+\begin{itemize}
+	\item Running on all inputs takes time $2^n$, exponential time.
+	\item If \texttt{HALT-IN-$2^n$} is $\Pi$, then a reduction $\Gamma$ cannot be solved in polynomial time
+	\item Must come up with a reduction
+\end{itemize}
+\section{Complexity Classes}
+\begin{definition}
+	[Complexity Classes]
+	Sets of problems defined by difficulty of solving.
+\end{definition}
+\begin{itemize}
+	\item We define $\text{Time}_\text{Search}(f(n)) =$ the set of Problems s.t. $\exists$ Word-RAM model solving $\Pi$ in time $O(f(n))$.
+\end{itemize}
+\begin{definition}
+	[Polynomial Search] $P_\text{Search} = \displaystyle\bigcup_{c \in \nats} \text{TIME}_\text{Search}(n^c)$.
+\end{definition}
+\begin{definition}
+	[Exponential Search] $\text{EXP}_\text{Search} = \displaystyle\bigcup_{c \in \nats}\text{TIME}_\text{Search}(2^{n^c})$.
+\end{definition}
+\begin{remark}
+	Any problem in $P_\text{Search}$ is in $\text{EXP}_\text{Search}$, as they would be bounded by it.
+\end{remark}
+\begin{definition}
+	[Decision Problems]
+	$P = \displaystyle\bigcup_c \text{Time}(n^c)$ and
+	$\text{EXP} = \displaystyle\bigcup_c \text{Time}(2^{n^c})$
+\end{definition}
+\begin{itemize}
+	\item Uses bit length $n$
+\item Comparison between complexity classes using Theorem 2.7: EXP contains P, but wonder if EXP = P. We now know that \texttt{HALT-IN-$2^n$} $\in \text{EXP} \land \not\in P$, and thus $P \subsetneq E \times P$.
+\end{itemize}
+\end{document}

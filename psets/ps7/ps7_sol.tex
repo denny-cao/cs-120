@@ -1,0 +1,223 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../../evan}
+\usepackage{graphicx}
+\usepackage{float}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning,chains,fit,shapes,calc}
+
+% Contradiction
+\newcommand{\contradiction}{{\hbox{%
+    \setbox0=\hbox{$\mkern-3mu\times\mkern-3mu$}%
+    \setbox1=\hbox to0pt{\hss$\times$\hss}%
+    \copy0\raisebox{0.5\wd0}{\copy1}\raisebox{-0.5\wd0}{\box1}\box0
+}}}
+
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 6}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		Problem Set 7
+		\endgroup \vskip 0.3cm
+		Due: November 15, 2023 11:59pm \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\textbf{Collaborators:}
+
+\textbf{No. of late days used on previous psets:} 2
+
+\textbf{No. of late days used after including this pset:} 3
+\section{Another Coloring Algorithm}
+\begin{enumerate}[(a)]
+	\item In \texttt{ps7.py}.
+	\item \
+		\begin{figure}[H]
+		\centering
+    \begin{tabular}{|c|l|l|l|}
+    \hline 
+    Algorithm
+    & \multicolumn{1}{|p{2cm}|}{Exhaustive}
+    & \multicolumn{1}{|p{2cm}|}{ISET BFS}
+    & \multicolumn{1}{|p{2cm}|}{SAT Color}\\\hline
+    \hline
+		\# Solvable Ring Instances & 0  & 1 & 6\\
+		\# Solvable Cluster Instances  & 9 & 15 & 18  \\
+        \# Solvable Hard Graphs  & 0  & 0 & 3 \\
+        \hline
+    \end{tabular}
+	\end{figure}
+	We see that \texttt{SAT Color} and \texttt{ISET BFS} are relatively faster than \texttt{Exhaustive}, as all scenarios in which \texttt{Exhaustive} returned a solution, the other two algorithms did as well, but \texttt{Exhaustive} did not return when one or both of the others did for some scenarios. We know that \texttt{SAT Color} is relatively faster than \texttt{ISEF BFS} for the same reason. 
+	\\
+
+	This aligns with the theoretical runtimes for the algorithms, as \texttt{Exhaustive-Search 3-Coloring} takes time $O(m3^n)$, as there are $3^n$ ways to pick a color for each of the $n$ vertices with $m$ edges which must be checked to see if there are conflicting colors, whereas \texttt{ISEF-BFS-Coloring} takes time $O(1.89^n)$ from the SRE, and a reduction to \texttt{SAT} from $k$-coloring would take $O(n+km)$, and thus for 3-coloring, would take $O(n + 3m)$.
+\item 
+\end{enumerate}
+\section{2SAT}
+
+Although viewing all clauses together as a CNF creates a paradox, each clause separately makes sense. We will explain for 3 clauses:
+\begin{itemize}
+	\item $\neg D \lor \neg A \equiv D \to \neg A$: This is the statement that, if Alice landed the time machine at her grandparents' first date and ruined it, then Alice's grandparents do not get married. We assume that, if a first date goes bad, then they will not pursue a relationship. 
+	\item $D \lor A \equiv \neg D \to A$: This is the statement that, if Alice does not land the time machine at her grandparents' first date and ruined it, then Alice's grandparents get married. This is reasonable, as if Alice does not interfere with the date, it goes well and from our assumption, they pursue a relationship.
+	\item $C \lor \neg D \equiv \neg C \to \neg D$: This is the statement that, if Alice does not create a time machine in order to travel to the past, then Alice does not land the time machine at her grandparents' first date and ruin it. This makes sense, as Alice cannot land the time machine without creating a time machine, and if she does create a time machine, then (only viewing this clause), Alice could've landed anywhere.
+\end{itemize}
+The implication graph of the CNF is below:
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+ 	\node[shape=circle,draw=black] (A) at (0,0) {$A$};
+    \node[shape=circle,draw=black] (B) at (2,0) {$B$};
+    \node[shape=circle,draw=black] (C) at (4,0) {$C$};
+    \node[shape=circle,draw=black] (D) at (6,0) {$D$};
+
+ 	\node[shape=circle,draw=black] (nA) at (0,-3) {$\neg A$};
+    \node[shape=circle,draw=black] (nB) at (2,-3) {$\neg B$};
+    \node[shape=circle,draw=black] (nC) at (4,-3) {$\neg C$};
+    \node[shape=circle,draw=black] (nD) at (6,-3) {$\neg D$};
+
+	\draw[->] (A) -- (B);
+	\draw[->] (B) to [bend right=60] (A);
+	\draw[->] (nB) to [bend left=60] (nA);
+	\draw[->] (B) -- (C);
+	\draw[->] (C) to [bend right=60] (B);
+	\draw[->] (nC) to [bend left=60] (nB);
+	\draw[->] (C) -- (D);
+	\draw[->] (D) to [bend right=60] (C);
+	\draw[->] (nD) to [bend left=60] (nC);
+	\draw[->] (D) to [bend right=10] (nA);
+	\draw[->] (nA) to [bend right=10] (D);
+	\draw[->] (nA) -- (nB);
+	\draw[->] (nB) -- (nC);
+	\draw[->] (nC) -- (nD);
+	\draw[->] (nD) to [bend right=10] (A);
+	\draw[->] (A) to [bend right=10] (nD);
+	\end{tikzpicture}
+	\caption{Implication Graph of the CNF Formula}
+\end{figure}
+The CNF is unsatisfiable, as there exists a ``bad cycle'', or path from some literal $x$ to $\neg x$ and $\neg x$ to $x$. From our graph, there exists the path $\set*{A, B, C, D, \neg A, \neg B, \neg C, \neg D, A}$. We see that the path goes from $A$ to $\neg A$, and $\neg A$ to $A$, and therefore the CNF is unsatisfiable.
+\section{Reductions to SAT}
+\begin{enumerate}[(a)]
+	\item 
+		\begin{proof}
+			We first describe the algorithm:
+			\begin{itemize}
+				\item Preprocess: We construct a CNF $\phi$. In  $\phi$, we construct variables $x_{i,j}$, where $i \in [n]$ and $j \in [k]$ to represent if student $s_i$ is the $j$-th person in the team of $k$.
+
+					We will form clauses:
+					\begin{itemize}
+						\item $A_\ell$ by iterating over $S$, and for each student $s_i \in S$, iterating over $K(s_i)$ and for each $\ell \in K(s_i)$, adding the clause $\bigvee\limits_{j \in [k]}x_{i,j}$ to $A_\ell$. 
+						\item $B_{i,a,b} = (\neg x_{i,a} \lor \neg x_{i,b}) $ for $i \in [n]$, for $a,b \in [k]$ where $a \neq b$. 
+						\item $C_j = \bigvee\limits_{i \in [n]}x_{i, j}$ for $j \in [k]$. 
+						\item $D_{a,b,j} = (\neg x_{a,j} \lor \neg x_{b,j})$ for $a,b \in [n]$ where $a \neq b$, for $j \in [k]$. 
+					\end{itemize}
+						\item We make an oracle call to \texttt{SAT} on $\phi$ and get an assignment $\alpha$.
+						\item Postprocess: If $\alpha = \perp$, then return $\perp$. Otherwise, we use the assignment $\alpha$ to form the team $T = \set*{i \in [n] : \alpha_{i,j} = 1}$.
+			\end{itemize}
+			We now want to prove our reduction algorithm:
+			\begin{enumerate}[1.]
+				\item has the desired amount of variables and clauses for $\phi$ and
+				\item is correct.
+			\end{enumerate}
+			\begin{itemize}
+				\item We construct variables $x_{i,j}$ to represent if $s_i$ is the $j$-th person on the team. As there are $n$ students and $k$ people on the team, it follows that $\phi$ has $kn$ variables. We will now find the amount of clauses:
+\begin{itemize}
+	\item As we form a clause $A_\ell$ for each language, and there are $m$ languages, there are $m$ clauses.
+	\item As we form a clause $B_{i,a,b}$ for each pair of unique slots on the team for each student, there are $O(k^2)$ clauses for each student, and thus there are $O(k^2n)$ clauses.
+	\item As we form a clause $C_j$ for each slot on the team, and there are $k$ slots on the team, there are $k$ clauses.
+\item As we form a clause $D_{a,b,j}$ for each unique pair of students for each slot on the team, there are $O(n^2)$ clauses for each slot on the team, and thus there are $O(n^2k)$ clauses.
+\end{itemize}
+We can sum this to obtain $m + O(k^2n) + k + O(n^2k)$ clauses. As  $n > k$, we can simplify further to obtain $m + O(kn^2)$ clauses.
+\item We will prove the correctness of our reduction algorithm by analyzing the assignment $\alpha$ to $\phi$. $\alpha \neq \perp$ if all clauses are satisfied. We will observe what each clause entails.
+	\begin{itemize}
+		\item The clauses $A_\ell, \ell \in [m]$ ensure that, for each language, there exists one student on the team that knows it. If $\exists A_\ell$ such that $A_\ell$ is unsatisfied, then a team that knows all $m$ languages cannot be formed, as there exists a language that no student knows.
+		\item The clauses $B_{i,a,b}, i \in [n], a, b \in [k], a \neq b$ ensure that each student is in at most 1 slot of the team. If $\exists B_{i,a,b}$ such that $B_{i,a,b}$ is unsatisfied, then there exists slots $a,b$ such that $s_i$ is in both. We can observe this by rewriting the clause as $\neg(x_{i,a} \land x_{i,b})$, which will only be false when  $x_{i,a} = x_{i,b} = 1$, and thus the team of unique members cannot be formed.
+		\item The clauses $C_j, j \in [k]$ ensure that each slot on the team has a member. If $\exists C_j$ such that $C_j$ is unsatisfied, then there does not exist a student $s_i$ in slot $j$ of the team, and thus the team of size $k$ can be formed.
+		\item The clauses $D_{a,b,j}, a,b \in [n], a \neq b, j \in [k]$ ensure that each slot on the team has only 1 member. If $\exists D_{a,b,j}$ such that $D_{a,b,j}$ is unsatisfied, then there exists a slot $j$ on the team with two members, which is not a valid result. We can observe this by rewriting the clause as $\neg(x_{a,j} \land x_{b,j})$, which will only be false when $x_{a,j} = x_{b,j} = 1$.
+	\end{itemize}
+	The clauses ensure that the team consists of $k$ unique members where, for every language $\ell \in L$, there exists a member $t$ such that $\ell \in K(t)$. If $\alpha \neq \perp$, then then there exists a combination of $k$ students such that this is true. If $\alpha = \perp$, then there does not.
+	When $\alpha \neq \perp$, then for each $j \in [k]$, only one $x_{i,j} = 1$, which represents placing student $s_i$ in the $j$-th slot of the team. In our postprocessing, we return a set of each student for each $j$, resulting in $k$ students that satisfy the clauses above, and thus when the algorithm returns, the output is correct.
+			\end{itemize}
+			We will now analyze the runtime. For preprocessing, initializing $kn$ variables takes time $O(kn)$. For each clause:
+			\begin{itemize}
+				\item Iterating over $S$ takes time $O(n)$. For each student $s_i$, we iterate over each $\ell \in K(s_i)$, and in the worst case, each student knows $m$ languages, thus taking  $O(m)$. We then add $k$ variables associated for each student to $A_\ell$, thus taking $O( mk)$ for each student. Thus, in total, these clauses take $O(mkn)$ to build.
+				\item Creating  $O(k^2)$ clauses for each student takes time $O(k^2n)$ to build.
+				\item Creating  a clause of all students will take $O(k)$ for each slot on the team. As there are $n$ slots, it will take time $O(kn)$ to build.
+				\item Creating  $O(n^2)$ clauses for each slot on the team takes time $O(n^2k)$ to build.
+			\end{itemize}
+			We combine the runtimes to get $O(kn) + O(mkn) + O(k^2n) + O(kn) + O(n^2k) = O(mkn + n^2k)$, which is the time it takes to build $\phi$. We make a single oracle call to \texttt{SAT} which will take $O(1)$. If the assignment  $\alpha$ of  $\phi$ is not $\perp$, then we iterate through each $\alpha_{i,j}$, and if  $\alpha_{i,j} = 1$, then we add it to the output $T$. Iterating through $\alpha$ takes $O(kn)$, as there are $kn$ variables, and for each $kn$, we perform a basic operation $O(1)$, and thus the postprocessing takes $O(kn)$. 
+
+			Thus, the total runtime of the algorithm is $O(mkn + n^2k) + O(1) + O(kn) = O(mkn + n^2k)$.
+		\end{proof}
+\end{enumerate}
+\end{document}
+

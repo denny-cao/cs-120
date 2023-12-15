@@ -1,0 +1,140 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+% Computational Problem Shortcuts
+\newcommand{\I}{\mathcal{I}}
+
+% Empty Set
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture 6:  --- Thursday September 21, 2023 
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: September 27, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{RAM Model}
+\subsection{Goals}
+\begin{itemize}
+	\item Unambiguous: Know what a step is 
+	\item Expressivity: Capture what we think of as algorithm
+	\item Mathematical Simplicity: Not too many operations
+	\item Technical Relevances: One model applies to all languages
+\end{itemize}
+\begin{definition}
+	[RAM Model]
+	A program consists of:
+	\begin{itemize}
+		\item A set $V$ of variables
+		\item Commands $C_0,C_1,\dots,C_n$ each:
+			\begin{itemize}
+				\item $\text{var}_i=c$, $\text{var}_i \in V, c \in nats$
+				\item $\text{var}_0 = \text{var}_1 \text{ op } \text{var}_2$, $\text{var}_0, \text{var}_1, \text{var}_2 \in V$, $\text{op} \in \set*{+, -, \times, \div}$
+				\item $\text{var}_0 = M[\text{var}_1]$
+				\item  $M[\text{var}_0] = \text{var}_1$
+				\item If  $\text{var}==0$, GO TO  $K$,  $K \in \set*{0_1, \dots l}$
+			\end{itemize}
+	\end{itemize}
+\end{definition}
+\begin{definition}
+	[Computation w/RAM Program] \
+
+	\textit{Initialize}: Encode input in memory $M[0], \dots, M[n-1]$ (input is size $n$) and $M[k]=0$ if $k \geq n$.
+	\\
+
+	\textit{Execution}: Execute $C_0, C_1, C_2, \dots$ except that GOTO commands change order.
+	\\
+
+		\renewcommand{\defeq}{\vcentcolon=}
+	\textit{Output}: When the program reaches line $l$, output $\defeq M[\text{output\_ptr}], \dots, M[\text{output} + \text{output\_len}]$
+	$P(x) = \perp$ if it halts, $\text{Time}_p(x) = $ \# commands executed
+\end{definition}
+\end{document}

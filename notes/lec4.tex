@@ -1,0 +1,191 @@
+\documentclass[11pt]{scrartcl}
+\usepackage[sexy]{../../evan}
+\usepackage{graphicx}
+
+\definecolor{dg}{RGB}{2,101,15}
+\newtheoremstyle{dotlessP}{}{}{}{}{\color{dg}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{property}[theorem]{Property}
+
+\newtheoremstyle{dotlessN}{}{}{}{}{\color{teal}\bfseries}{}{ }{}
+\theoremstyle{dotlessN}
+\newtheorem{notation}[theorem]{Notation}
+% Shortcuts
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % ceil function
+
+\DeclarePairedDelimiter\paren{(}{)} % parenthesis
+
+\newcommand{\df}{\displaystyle\frac} % displaystyle fraction
+\newcommand{\qeq}{\overset{?}{=}} % questionable equality
+
+\newcommand{\Mod}[1]{\;\mathrm{mod}\; #1} % modulo operator
+
+\newcommand{\comp}{\circ} % composition
+
+% Text Modifiers
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+
+% Sets
+\DeclarePairedDelimiter\set{\{}{\}}
+\newcommand{\unite}{\cup}
+\newcommand{\inter}{\cap}
+
+\newcommand{\reals}{\mathbb{R}} % real numbers: textbook is Z^+ and 0
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\nats}{\mathbb{N}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\tots}{\mathbb{Q}}
+
+\newcommand{\degree}{^\circ}
+
+% Counting
+\newcommand\perm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\comb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+% Relations
+\newcommand{\rel}{\mathcal{R}} % relation
+
+% Computational Problem Shortcuts
+\newcommand{\I}{\mathcal{I}}
+
+% Empty Set
+
+\setlength\parindent{0pt}
+
+% Directed Graphs
+\usetikzlibrary{arrows}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
+\tikzset{svertex/.style = {shape=circle,draw,minimum size=.05em,font=\tiny}}
+\tikzset{edge/.style = {->,> = latex'}}
+\tikzset{dedge/.style = {-> = latex'}}
+\tikzset{dot/.style={inner sep=1.5pt,circle,draw,fill}}
+
+% Contradiction
+\newcommand\contradiction{\mathbin{\mathpalette\xhash\relax}}
+\newcommand{\xhash}[2]{\ooalign{%
+Ê $#1\xxhash{#1}{-45}$\cr
+Ê $#1\xxhash{#1}{45}$\cr
+Ê }%
+}
+\newcommand{\xxhash}[2]{\rotatebox[origin=c]{#2}{$#1\parallel$}}
+
+\title{CS 120: Intro to Algorithms and their Limitations}
+\subtitle{PSet 0}
+\author{Denny Cao}
+\date{\today}
+%++++++++++++++++++++++++++++++++++++++++
+% title stuff
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+	\begin{flushleft}
+		\large\textbf{\@title} \\ \vskip 0.2cm
+		\begingroup
+		\fontsize{14pt}{12pt}\selectfont
+		\title
+		\\
+		\normalsize Lecture 5:  --- Tuesday September 19, 2023 
+		\endgroup \vskip 0.3cm
+		\normalsize Pset Due: September 20, 2023 \hfill\rlap{}\textbf{Denny Cao} \\ \vskip 0.1cm
+		\hrulefill
+	\end{flushleft}\egroup
+}
+\makeatother
+
+\renewcommand{\theques}{\thesection.\alph{ques}} % Change subtheo counter for alpha output
+\declaretheorem[style=basehead,name=Answer,sibling=theorem]{ans}
+\renewcommand{\theans}{\thesection.\alph{ans}}
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\section{Announcements}
+\begin{itemize}
+	\item SRE next Thursday
+	\item Wednesday morning OH on Zoom
+	\item Late Policy: 3 days max for each assignment. Late days  $\in \nats$
+\end{itemize}
+\section{Dynamic Predecessor Data Structure}
+For a sorted array:
+\begin{itemize}
+	\item Insert$(k,v) = O(n)$
+	\item Delete$(k) = O(n)$
+	\item Search$(k) = O(\log n)$
+	\item Next-smaller$(k) = O(\log n)$
+\end{itemize}
+\section{Binary Search Tree}
+Our goal is to solve Dynamic Predecessors more easily.
+\begin{definition}
+	[Binary Search Tree (BST)]
+	Data structure defined \textbf{recursively}. Base case: $\emptyset$ or has a root $R$ and every vertex has:
+	\begin{itemize}
+		\item Key $K$ 
+		\item Value $V$ 
+		\item Left and Right Children $V_\text{left}$ and  $V_\text{right}$, each a BST (Could be a $\emptyset$)	
+		\item Satisfies the \textbf{BST Property}
+	\end{itemize}
+\end{definition}
+% Format this later
+\begin{property}
+	[BST Property]	
+	$\forall v:$ if $v$ has left child $v_l$ : 
+
+	the keys of $v_l$ and all its descendants are $\leq k_v$.
+
+	If $v$ has a right child, similar definition.
+\end{property}
+% Format this later
+\begin{algorithm}
+	\begin{verbatim}
+		If $T = \emptyset$	
+	\end{verbatim}
+	[Insert]
+	Insert$(T(k,v))$ :
+
+	if $T = \emptyset$: Return new BST w/key $K$, value $V$, no children
+
+	Let $v = \text{root}(T)$
+
+	if  $k \leq K_V$:
+	
+	T.Left = Insert$(T_L(K,V))$
+	
+	else \texttt{T.right} = Insert$(T_R(K,v))$
+	return  $T$
+\end{algorithm}
+\begin{definition}
+	[Height $h$]
+	Length of the longest path from $v$ to a leaf.
+	\begin{itemize}
+		\item \texttt{height($\emptyset$) = -1}
+	\end{itemize}
+\end{definition}
+\begin{proof}
+	[Proof that Insert Maintains BST Property]
+By induction on height \texttt{h} ``\texttt{Insert}($T(K,V)$) maintains BST if \texttt{height(T)} $\leq \texttt{h}$''
+
+	\textit{Base Case}: $h = -1$: No vertices  $\to$ no vertices to check.
+
+	If true for $< h: Insert (T(K,V))$:  \texttt{T} has a root  \texttt{v}, so  $\texttt{v} = \texttt{root(T)}$ is well defined.
+
+	If $k \leq k_v$:  $Insert(T_L(K,V))$:  $T_L$ has height $\leq h-1$
+\end{proof}
+\begin{itemize}
+	\item $Insert(k,v) = O(h)$
+	\item $Delete(k) = O(h)$
+	\item $Search(k) = O(h)$ \\
+	\item $Next-Smaller(k) = O(h)$
+\end{itemize}
+\begin{property}
+	[AVL Property]
+	\begin{itemize}
+		\item Every vertex is augmented with height 
+		\item Every pair of siblings have heights differing by $\leq 1$
+	\end{itemize}
+\end{property}
+\begin{itemize}
+	\item Maintain balance by rotations: Left rotation, right rotation,
+\end{itemize}
+\end{document}
